@@ -1,7 +1,7 @@
 ---
 name: freemoney
 description: "白拿钱 — 美国集体诉讼理赔追踪技能。监控60+开放案件，推送新增理赔，筛选免凭证案件。数据源覆盖OpenClassActions、TopClassActions、ClaimDepot三大平台。纯中文交互，I-Lang v4.0协议驱动。适合在美华人、跨境电商卖家、有美国账号的用户。"
-version: 1.1.0
+version: 1.1.1
 author: ilang-ai
 homepage: https://ilang.ai
 tags:
@@ -59,7 +59,7 @@ tags:
 1. 打开腾讯云轻量应用服务器：https://curl.qcloud.com/ITdTaJFc
 2. 选择99元/年的入门配置（够用了）
 3. 关键：在「镜像」那里选「应用镜像」，找到「OpenClaw」，点它
-4. 地域选离你最近的（国内选广州/上海/北京，海外选硅谷/新加坡）
+4. 地域选海外（推荐硅谷或新加坡，因为需要访问美国理赔网站）
 5. 支付宝或微信付款，等1分钟服务器就创建好了
 6. 在腾讯云控制台看到「运行中」就OK了
 
