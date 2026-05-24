@@ -1,147 +1,163 @@
-# 🦞 I-Lang (I Language) Skills for OpenClaw
+# I-Lang Skills for OpenClaw / Hermes / Any AI Agent
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/Platform-7%20AIs%20Tested-brightgreen)](#compatible-platforms)
-[![Skills](https://img.shields.io/badge/Skills-4%20Published-blue)](#skills)
-[![Security](https://img.shields.io/badge/ClawHub-All%20Green%20✓-brightgreen)](#security)
+[![Platform](https://img.shields.io/badge/Platform-8%2B%20AIs%20Tested-brightgreen)](#compatible-platforms)
+[![Skills](https://img.shields.io/badge/Skills-5%20Published-blue)](#skills)
+[![Protocol](https://img.shields.io/badge/I--Lang-v3.0%20%7C%2088%20Verbs-purple)](https://ilang.ai)
 [![Install](https://img.shields.io/badge/Install-Zero%20Dependencies-orange)](#quick-start)
 
-> **Like HTTP standardized the web, I-Lang standardizes how humans talk to AI.**
+> **I-Lang is not a human language simplified for AI. It is the native language of AI.**
 >
-> `[PROTOCOL:human-AI|compress=40-65%,compat=all-LLM]=>[ANSWER_ALL]=>[OUT]`
+> 88 verbs. Zero install. Zero ambiguity. Say it once, get it right.
 
 ---
 
-## 🎯 One Line Summary
+## What is I-Lang
 
-**No CLI. No API key. No brew. No npm. No install.** Copy a text block, paste into any AI, instant upgrade. Every skill is instruction-only with zero dependencies.
+A communication protocol for humans and AI. Like HTTP standardized the web, I-Lang standardizes how you talk to AI and how AI agents talk to each other.
 
----
-
-## 📦 Skills
-
-### 🟢 everything-is-ok `v1.0.2` — 无所不能
-
-Make any AI work better. Compress prompts, get complete answers, produce finished deliverables.
-
-```
-[SUM|sty=bullets,ton=pro,fmt=md]=>[OUT]    ← 75% fewer tokens, same result
-```
-
-[**→ Install on ClawHub**](https://clawhub.ai/adsorgcn/everything-is-ok)
+**No CLI. No API key. No brew. No npm.** Copy a text block, paste into any AI, instant upgrade. Every skill is instruction-only with zero dependencies.
 
 ---
 
-### 🟢 less-token `v1.0.2` — Save Tokens
+## Skills
 
-Save 40-65% tokens on every summarization task. Compress verbose prompts into one-line instructions.
+### freemoney `v1.1.1` -- Free Money (Class Action Tracker)
+
+Track 60+ open US class action settlements. Get notified of new claims. Filter no-proof cases. Chinese interface, real-time data from api.ilang.ai.
 
 ```
-Verbose:    "Please summarize the key findings in professional bullet points"
-Compressed: [SUM|key=findings,sty=bullets,ton=pro]=>[OUT]
-Saved:      77%
+"有什么新案子？"  "哪些不需要凭证？"  "怎么申请Google那个？"
 ```
 
-[**→ Install on ClawHub**](https://clawhub.ai/adsorgcn/less-token)
+Data sources: OpenClassActions + TopClassActions + ClaimDepot, updated daily.
+
+[**Install on ClawHub**](https://clawhub.ai/adsorgcn/freemoney) | [**Details**](./freemoney/SKILL.md)
 
 ---
 
-### 🟢 no-prompt `v1.0.0` — End of Prompt Engineering
+### everything-is-ok `v1.0.2` -- Make Any AI Better
 
-Stop learning 58 prompt techniques. Tell AI what you want in plain language — AI writes the perfect structured instruction for you.
+One skill to rule them all. Structured execution, complete answers, finished deliverables.
 
 ```
-Old way:    Human learns prompt engineering → writes prompt → sends to AI
-No Prompt:  Human says what they want → AI writes I-Lang → copy to any AI
+[SUM|sty=bullets,ton=pro,fmt=md]=>[OUT]
 ```
 
-[**→ Install on ClawHub**](https://clawhub.ai/adsorgcn/no-prompt)
+[**Install on ClawHub**](https://clawhub.ai/adsorgcn/everything-is-ok)
 
 ---
 
-### 🟢 ilang-compress `v2.3.1` — Original Compression
+### no-prompt `v1.0.0` -- End of Prompt Engineering
+
+Stop learning prompt techniques. Tell AI what you want in plain language. AI writes the perfect I-Lang instruction for you.
+
+```
+Old way:    Human learns prompt engineering -> writes prompt -> sends to AI
+No Prompt:  Human says what they want -> AI writes I-Lang -> copy to any AI
+```
+
+[**Install on ClawHub**](https://clawhub.ai/adsorgcn/no-prompt)
+
+---
+
+### less-token `v1.0.2` -- Compress Prompts
+
+Compress verbose prompts into one-line I-Lang instructions. 40-65% fewer tokens, same result.
+
+```
+Before: "Please summarize the key findings in professional bullet points"
+After:  [SUM|key=findings,sty=bullets,ton=pro]=>[OUT]
+```
+
+[**Install on ClawHub**](https://clawhub.ai/adsorgcn/less-token)
+
+---
+
+### ilang-compress `v2.3.1` -- Original Compression
 
 The original I-Lang compression skill. Translate any natural language prompt into I-Lang syntax.
 
-[**→ Install on ClawHub**](https://clawhub.ai/adsorgcn/ilang-compress)
+[**Install on ClawHub**](https://clawhub.ai/adsorgcn/ilang-compress)
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ```
 Step 1: Pick a skill above
 Step 2: Copy the protocol text from its skill page
 Step 3: Paste into any AI conversation
-Step 4: Done. Your AI is upgraded.
+Step 4: Done.
 ```
 
-**No terminal. No config. No restart.** Works inside OpenClaw and outside — any AI, any platform.
+Works inside OpenClaw, Hermes, YouMind, and outside -- any AI, any platform.
 
 ---
 
-## 🔄 How It's Different
+## Distribution
+
+| Platform | Link |
+|----------|------|
+| ClawHub | [clawhub.ai/adsorgcn](https://clawhub.ai/adsorgcn) |
+| Hermes (agentskills.io) | `hermes skills install` |
+| YouMind | [youmind.com](https://youmind.com) |
+| GitHub | This repo -- clone and use directly |
+
+---
+
+## How It's Different
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  Traditional Skills                                          │
-│  brew install → config API key → restart agent → use         │
-│  ❌ Single platform  ❌ Dependencies  ❌ Setup time           │
-├──────────────────────────────────────────────────────────────┤
-│  I-Lang Skills                                               │
-│  copy text → paste into AI → use                             │
-│  ✅ Every platform   ✅ Zero deps     ✅ 30 seconds           │
-└──────────────────────────────────────────────────────────────┘
+Traditional Skills:
+  brew install -> config API key -> restart agent -> use
+  Single platform. Dependencies. Setup time.
+
+I-Lang Skills:
+  copy text -> paste into AI -> use
+  Every platform. Zero deps. 30 seconds.
 ```
 
 ---
 
-## 🔒 Security
+## Security
 
-All skills pass ClawHub security scan with **Benign — High Confidence**:
+All skills pass ClawHub security scan with **Benign -- High Confidence**:
 
-- ✅ Instruction-only — no code, no scripts, no binaries
-- ✅ Zero credentials — no API keys, no env vars, no tokens
-- ✅ Zero network access — no URLs fetched, no external calls
-- ✅ Text-to-text translator — converts natural language to structured syntax, nothing more
+- Instruction-only -- no code, no scripts, no binaries
+- Zero credentials -- no API keys, no env vars, no tokens
+- Zero network access -- no URLs fetched, no external calls
+- Text-to-text protocol -- converts natural language to structured syntax
 
 ---
 
-## ✅ Compatible Platforms
+## Compatible Platforms
 
 | Platform | Tested | Platform | Tested |
 |----------|--------|----------|--------|
-| ChatGPT | ✅ | Kimi | ✅ |
-| Claude | ✅ | 豆包 | ✅ |
-| Gemini | ✅ | 元宝 | ✅ |
-| DeepSeek | ✅ | Any LLM | ✅ |
+| ChatGPT / GPT-4o | Yes | Kimi | Yes |
+| Claude | Yes | DeepSeek | Yes |
+| Gemini | Yes | Qwen | Yes |
+| OpenClaw | Yes | Hermes | Yes |
 
 ---
 
-## 📊 Before & After
-
-| Task | Before | After | Saved |
-|------|--------|-------|-------|
-| Summarize document | 67 words | `[SUM\|sty=bullets,ton=pro,fmt=md]=>[OUT]` | 75% |
-| Rewrite professionally | 22 words | `[REWRITE\|ton=pro]=>[OUT]` | 82% |
-| Compare & recommend | 58 words | `[CMP]=>[EVAL]=>[RANK]=>[OUT\|fmt=md]` | 85% |
-| Translate + format | 38 words | `[TRANSLATE\|lang=zh]=>[FMT\|fmt=md]=>[OUT]` | 68% |
-
----
-
-## 🌐 Ecosystem
+## Ecosystem
 
 | Resource | Link |
 |----------|------|
-| 🌐 Protocol & Tools | [ilang.ai](https://ilang.ai) |
-| 🔬 Research & Papers | [research.ilang.ai](https://research.ilang.ai) |
-| 👁 AI See — Give AI Eyes | [i.ilang.ai](https://i.ilang.ai) |
-| 📖 Full Dictionary | [ilang-dict](https://github.com/ilang-ai/ilang-dict) — 52 verbs, 28 modifiers, 14 entities |
+| Protocol & Dictionary | [ilang.ai](https://ilang.ai) -- 88 verbs, 13 symbol aliases |
+| Spec & Source | [ilang-ai/ilang-spec](https://github.com/ilang-ai/ilang-spec) |
+| AI See | [i.ilang.ai](https://i.ilang.ai) -- Give AI eyes to see any URL |
+| AutoCode | [ilang-ai/autocode](https://github.com/ilang-ai/autocode) -- 38+ skills for Claude Code / Cursor |
+| Imprint | [ilang-ai/Imprint](https://github.com/ilang-ai/Imprint) -- AI personality persistence |
+| Research | [ORCID 0009-0004-4540-8082](https://orcid.org/0009-0004-4540-8082) |
+| Book | Amazon ASIN B0CZY6V3GM |
 
 ---
 
-## 📜 License
+## License
 
-MIT — Free to use, modify, share, and build on.
+MIT -- Free to use, modify, share, and build on.
 
-**I-Lang Research · Eastsoft Inc. · Canada · © 2026**
+**I-Lang Research / Eastsoft Inc. / Canada / 2026**
