@@ -1,7 +1,7 @@
 ---
 name: lazarus
 description: "Lazarus — Bring dead websites back to life. Recover Google-indexed content from defunct websites via Wayback Machine, then deploy with AutoCode. Only recovers content that was actually indexed — no garbage. 捡尸复活已倒闭网站，只捡被谷歌收录过的内容，配合AutoCode一键部署。"
-version: 1.0.4
+version: 1.0.5
 author: ilang-ai
 homepage: https://ilang.ai
 tags:
@@ -47,7 +47,7 @@ That content is original, abandoned, and free. But not all of it is worth recove
 
 ### Why Google Index Verification Matters
 
-Dead site with 500 archived pages. Without verification, you recover all 500.
+Dead site with 500 archived pages. **Without Lazarus**, you'd blindly recover all 500 — most of them junk.
 With Lazarus: 80 were Google-indexed (GOLD), 120 were likely indexed (SILVER), 300 were never indexed (SKIP).
 
 **You just saved 60% of your time and got only the content that matters.**
@@ -104,7 +104,7 @@ Lazarus recovers content → AutoCode deploys → Live site in one session
 
 ### 为什么要验证谷歌收录
 
-一个死站有500个历史页面。不验证，你全捡回来。
+一个死站有500个历史页面。**不用Lazarus的话**，你只能盲目全捡回来——大部分是垃圾。
 用 Lazarus：80个被谷歌收录过（金矿），120个可能收录过（银矿），300个从未收录（跳过）。
 
 **省了60%的时间，只拿有价值的内容。**
