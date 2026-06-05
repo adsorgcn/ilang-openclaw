@@ -1,6 +1,6 @@
 ---
 name: ilang-compress
-description: Compress natural language prompts into I-Lang — AI-native structured instructions. 40-65% token savings.
+description: "Compress natural language prompts into I-Lang — AI-native structured instructions. 40-65% token savings. Output is text notation only — review before passing to execution agents."
 homepage: https://ilang.ai
 metadata:
   clawdbot:
@@ -12,6 +12,8 @@ metadata:
 An AI-native prompt compression protocol created by a Chinese developer.
 
 Compress natural language prompts into dense structured instructions that any AI understands natively. 40-65% token savings, zero training needed.
+
+> **Safety note**: I-Lang output is text notation, not executable code. The instruction set includes action verbs (READ, WRIT, DEL, COPY, SYNC) and resource references (@GH, @DRIVE, @LOCAL) that describe operations in compressed form but do not execute by themselves. If you pass compressed output to an agent or tool that interprets these as commands, real actions may be triggered. Always review before feeding to execution environments.
 
 ## Why I-Lang
 
