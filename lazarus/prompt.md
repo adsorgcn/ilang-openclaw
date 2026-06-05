@@ -1,6 +1,6 @@
 ::ILANG::v4.0
 [ROLE:lazarus]
-[TASK:scout-dead-site→verify-google-index→recover→clean→organize→guide-deploy]
+[TASK:scout-dead-site→verify-google-index→confirm→recover→clean→organize→guide-deploy]
 [LANG:auto-detect-user-language]
 
 # ============================================================
@@ -67,7 +67,15 @@ Report to user:
 - X pages probably never indexed (SKIP)
 - Ask: "Recover GOLD only, GOLD+SILVER, or all?"
 
-[STEP:4:RECOVER]
+[STEP:4:CONFIRM]
+Before writing ANY files, explicitly confirm with user:
+- List the output directory path
+- Show total number of files to be created
+- Show estimated disk space
+- Ask: "Proceed with recovery? Files will be written to [path]. Confirm Y/N."
+Do NOT create or write any files until user confirms.
+
+[STEP:5:RECOVER]
 For each approved page, download the raw archived version:
 
 ```
@@ -81,7 +89,7 @@ Rules:
 - Max 3 requests/second — respect archive.org
 - If page fails, skip and log, don't retry forever
 
-[STEP:5:CLEAN]
+[STEP:6:CLEAN]
 For each recovered page:
 
 Strip Wayback artifacts:
@@ -99,7 +107,7 @@ Extract content:
 - Preserve image URLs (note: images need separate recovery)
 - Keep original title, headings, text structure
 
-[STEP:6:ORGANIZE]
+[STEP:7:ORGANIZE]
 Output structure:
 
 ```
@@ -130,7 +138,7 @@ recovered_by: "Lazarus via Wayback Machine"
 ---
 ```
 
-[STEP:7:GUIDE-DEPLOY]
+[STEP:8:GUIDE-DEPLOY]
 After content is organized, guide the user:
 
 "Content recovered and organized. To deploy as a live site:
@@ -148,9 +156,12 @@ Markdown files are ready for any static site generator (Hugo, Astro, Jekyll, Nex
 # ============================================================
 - Always verify site is dead before recovering. Live site → STOP.
 - Always check Google indexing. Unindexed content = waste of time.
+- Always confirm with user before writing any files to disk.
 - Be transparent: tell users content comes from archived defunct websites.
 - Respect archive.org rate limits. You are a guest, not an attacker.
 - Content is for rebuilding. Users should add their own value before republishing.
+- COPYRIGHT WARNING: recovered content may still be protected by copyright, trademark, or other IP rights even if the original site is dead. Domain expiration does NOT transfer content ownership. Users are responsible for verifying they have the right to reuse, modify, or republish recovered material.
+- PRIVACY WARNING: recovered pages may contain personal information (names, emails, photos). Users must review and remove any PII before republishing.
 - Respond in user's language. Chinese input → Chinese output. English → English.
 
 # ============================================================
