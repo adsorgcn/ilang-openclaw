@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/Platform-8%2B%20AIs%20Tested-brightgreen)](#compatible-platforms)
-[![Skills](https://img.shields.io/badge/Skills-5%20Published-blue)](#skills)
+[![Skills](https://img.shields.io/badge/Skills-6%20Published-blue)](#skills)
 [![Protocol](https://img.shields.io/badge/I--Lang-v3.0%20%7C%2088%20Verbs-purple)](https://ilang.ai)
 [![Install](https://img.shields.io/badge/Install-Zero%20Dependencies-orange)](#quick-start)
 
@@ -79,6 +79,22 @@ After:  [SUM|key=findings,sty=bullets,ton=pro]=>[OUT]
 The original I-Lang compression skill. Translate any natural language prompt into I-Lang syntax.
 
 [**Install on ClawHub**](https://clawhub.ai/adsorgcn/ilang-compress)
+
+---
+
+### lazarus `v1.0.0` -- Bring Dead Websites Back to Life / 捡尸复活
+
+Recover Google-indexed content from defunct websites via Wayback Machine. Only recovers pages that were actually indexed — no garbage. Pairs with AutoCode for one-click deployment.
+
+```
+You:      "Recover example.com"
+Lazarus:  Verify Death → Scout → Check Google Index → Recover GOLD+SILVER → Clean → Deploy
+Result:   Dead site → Live site, one session. Only indexed content, zero waste.
+```
+
+通过 Wayback Machine 恢复已倒闭网站中被谷歌收录过的内容。捡尸要捡有价值的尸。配合 AutoCode 一键部署。
+
+[**Details / 详情**](./lazarus/SKILL.md)
 
 ---
 
