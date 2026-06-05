@@ -1,7 +1,7 @@
 ---
 name: no-prompt
 description: "Stop learning prompt engineering. Tell AI what you want in plain language — AI writes a structured instruction for you in I-Lang. Copy it to other AIs as a well-structured starting point. Zero prompt skills needed. Generates text instructions only, no code, no install, no credentials. Results may vary by model."
-version: 1.0.1
+version: 1.0.2
 author: ilang-ai
 homepage: https://ilang.ai
 tags:
