@@ -1,4 +1,5 @@
 {
+  "id": "@adsorgcn/freemoney-plugin",
   "name": "@adsorgcn/freemoney-plugin",
   "displayName": "白拿钱 (Free Money)",
   "description": "US class action settlement tracker. Queries api.ilang.ai for open claims, filters no-proof settlements, and pushes daily updates to your channel.",
