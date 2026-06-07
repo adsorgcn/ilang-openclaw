@@ -1,17 +1,15 @@
 /**
- * SoulForge — 灵魂打印机 v2.3
+ * SoulForge — 灵魂打印机 v2.4
  *
- * v2.3: 学习花叔女娲的方式，不在plugin代码里调搜索API。
- *       distill_search 返回结构化搜索任务，让agent自己搜。
- *       agent搜完后把文本传给 distill_corpus 蒸馏。
- *       plugin只做两件事：蒸馏+写文件。
+ * v2.4: 修 runEmbeddedAgent 完整参数签名（龙虾工厂实测反馈）
  *
  * © 2026 iLang Inc., Canada. MIT License.
  */
 
+import { randomUUID } from "crypto";
 import { homedir } from "os";
 import { writeFileSync, copyFileSync, mkdirSync, existsSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
 
 const SAMPLING_DEFAULT = 50000;
 const previewCache = new Map<string, string>();
@@ -76,7 +74,7 @@ function resolveSoulPath(api: any): string {
 
 function backupAndWrite(api: any, soulPath: string, content: string): { success: boolean; backedUp: boolean; backupPath: string } {
   try {
-    const dir = join(soulPath, "..");
+    const dir = dirname(soulPath);
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     let backedUp = false;
     let backupPath = "";
@@ -103,19 +101,61 @@ function log(api: any, level: string, msg: string, err?: any) {
   fn(err ? `[SoulForge] ${msg}: ${String(err)}` : `[SoulForge] ${msg}`);
 }
 
+/**
+ * LLM调用 — 按龙虾工厂给的完整参数签名
+ */
 async function callLLM(api: any, prompt: string): Promise<string> {
+  // 方案1: runEmbeddedAgent 完整参数（OpenClaw 2026.5.4+）
   if (api?.runtime?.agent?.runEmbeddedAgent) {
     try {
-      const res = await api.runtime.agent.runEmbeddedAgent({ prompt, timeoutMs: 60000 });
-      return extractText(res);
-    } catch (err) { log(api, "warn", "runEmbeddedAgent failed", err); }
+      const cfg = api.config;
+      const runId = randomUUID();
+      const agentDir = api.runtime.agent.resolveAgentDir
+        ? api.runtime.agent.resolveAgentDir(cfg)
+        : join(homedir(), ".openclaw");
+      const workspaceDir = api.runtime.agent.resolveAgentWorkspaceDir
+        ? api.runtime.agent.resolveAgentWorkspaceDir(cfg)
+        : join(homedir(), ".openclaw", "workspace");
+      const timeoutMs = api.runtime.agent.resolveAgentTimeoutMs
+        ? api.runtime.agent.resolveAgentTimeoutMs(cfg)
+        : 120000;
+
+      const sessionsDir = join(agentDir, "sessions");
+      if (!existsSync(sessionsDir)) mkdirSync(sessionsDir, { recursive: true });
+
+      const res = await api.runtime.agent.runEmbeddedAgent({
+        sessionId: `soulforge:${runId}`,
+        runId,
+        sessionFile: join(sessionsDir, `soulforge-${runId}.jsonl`),
+        workspaceDir,
+        prompt,
+        timeoutMs,
+      });
+
+      const text = extractText(res);
+      log(api, "info", `runEmbeddedAgent returned ${text.length} chars`);
+      return text;
+    } catch (err) {
+      log(api, "error", "runEmbeddedAgent failed", err);
+    }
   }
+
+  // 方案2: api.llm.complete fallback
   if (api?.llm?.complete) {
     try {
-      const res = await api.llm.complete({ messages: [{ role: "user", content: prompt }], temperature: 0.3 });
-      return res?.content || res?.text || extractText(res);
-    } catch (err) { log(api, "warn", "llm.complete failed", err); }
+      const res = await api.llm.complete({
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+      });
+      const text = res?.content || res?.text || extractText(res);
+      log(api, "info", `llm.complete returned ${text.length} chars`);
+      return text;
+    } catch (err) {
+      log(api, "error", "llm.complete failed", err);
+    }
   }
+
+  log(api, "error", "No LLM interface available (runEmbeddedAgent and llm.complete both missing/failed)");
   return "";
 }
 
@@ -128,12 +168,16 @@ function extractText(r: any): string {
 
 export default function register(api: any) {
   const samplingSize = api?.pluginConfig?.samplingSize || SAMPLING_DEFAULT;
-  log(api, "info", `SoulForge v2.3 loaded. samplingSize=${samplingSize}`);
 
-  // ========== 语料模式：用户粘贴文本或agent传入搜索结果 ==========
+  log(api, "info", `SoulForge v2.4.0 loaded. samplingSize=${samplingSize}`);
+  log(api, "info", `runEmbeddedAgent: ${!!api?.runtime?.agent?.runEmbeddedAgent}`);
+  log(api, "info", `resolveAgentDir: ${!!api?.runtime?.agent?.resolveAgentDir}`);
+  log(api, "info", `llm.complete: ${!!api?.llm?.complete}`);
+
+  // ========== 语料模式 ==========
   api.registerTool({
     name: "soulforge_distill_corpus",
-    description: "蒸馏写作风格：接收文本语料（用户粘贴或agent搜索采集的结果），提取表达指纹，展示预览，用户确认后写入SOUL.md。",
+    description: "蒸馏写作风格：接收文本语料，提取表达指纹，展示预览，用户确认后写入SOUL.md。",
     parameters: {
       type: "object",
       properties: {
@@ -147,7 +191,7 @@ export default function register(api: any) {
       const { text, source, confirmed } = params;
 
       if (!text || text.trim().length < 500) {
-        return textResult("语料太短（不足500字），请提供更多内容。如果是搜索模式，请先用WebSearch采集更多资料再传入。");
+        return textResult("语料太短（不足500字），请提供更多内容。");
       }
 
       const cacheKey = `corpus_${source}`;
@@ -156,6 +200,11 @@ export default function register(api: any) {
         log(api, "info", `Distilling "${source}", ${text.length} chars`);
         const sampled = sampleCorpus(text, samplingSize);
         const soulContent = await callLLM(api, buildDistillPrompt(sampled, source));
+
+        // P1: 区分空输出和格式错
+        if (!soulContent.trim()) {
+          return textResult("蒸馏失败：LLM没有返回内容。请查看插件日志（搜索 [SoulForge]）确认 runEmbeddedAgent 或 llm.complete 是否可用。");
+        }
 
         if (!soulContent.includes("::ILANG::v4.0")) {
           return textResult(`蒸馏失败：LLM输出格式不符合预期。\n\n原始输出前500字：\n${soulContent.slice(0, 500)}`);
@@ -192,7 +241,7 @@ ${soulContent}
     },
   });
 
-  // ========== 搜索模式：返回搜索任务，让agent自己搜 ==========
+  // ========== 搜索模式：返回结构化任务让agent搜 ==========
   api.registerTool({
     name: "soulforge_distill_search",
     description: "搜索蒸馏模式：输入人名，返回结构化搜索任务。你（agent）执行搜索采集后，把结果传给 soulforge_distill_corpus 完成蒸馏。",
@@ -213,24 +262,21 @@ ${soulContent}
 
 请你（agent）执行以下搜索任务，采集此人的写作语料：
 
-第1轮搜索：「${name} 文章」—— 提取此人写的长文、博客、专栏原文
+第1轮搜索：「${name} 文章」—— 提取长文、博客、专栏原文
 第2轮搜索：「${name} 演讲 原文」—— 提取演讲稿、讲话全文
-第3轮搜索：「${name} 语录」—— 提取高频表达、金句、口头禅
-第4轮搜索：「${name} 访谈」—— 提取对话、问答、即兴回应
-第5轮搜索：「${name} 观点」—— 提取核心主张、争议立场
+第3轮搜索：「${name} 语录」—— 提取高频表达、金句
+第4轮搜索：「${name} 访谈」—— 提取对话、问答
+第5轮搜索：「${name} 观点」—— 提取核心主张
 
-每轮搜索后，提取正文内容（不要只取标题和摘要）。如果搜索结果中有文章链接，用WebFetch读取全文。
+每轮搜索后，提取正文内容。如有文章链接，用WebFetch读取全文。
+信息源排除：不使用知乎、百度百科。
 
-信息源排除：不使用知乎、百度百科内容。优先使用此人本人的文章、演讲原文、书籍片段。
+采集完成后，调用 soulforge_distill_corpus：
+  text: 全部文本（用---分隔不同来源）
+  source: "${name}"
+  confirmed: false
 
-采集完成后：
-1. 把所有搜索到的文本合并（用"---"分隔不同来源）
-2. 调用 soulforge_distill_corpus 工具，参数：
-   - text: 合并后的全部文本
-   - source: "${name}"
-   - confirmed: false
-
-目标：采集至少5000字语料。语料越多蒸馏越准。`);
+目标：至少5000字语料。`);
     },
   });
 }
