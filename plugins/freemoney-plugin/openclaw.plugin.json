@@ -3,7 +3,7 @@
   "name": "@adsorgcn/freemoney-plugin",
   "displayName": "白拿钱 (Free Money)",
   "description": "US/CA/UK/AU class action settlement tracker. Queries api.ilang.ai for open claims, filters no-proof settlements, and pushes daily updates.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "ilang-ai",
   "homepage": "https://ilang.ai",
   "entryPoint": "dist/index.js",
