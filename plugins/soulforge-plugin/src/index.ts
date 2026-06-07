@@ -1,7 +1,7 @@
 /**
- * SoulForge — 灵魂打印机 v2.4
+ * SoulForge — 灵魂打印机 v3.0
  *
- * v2.4: 修 runEmbeddedAgent 完整参数签名（龙虾工厂实测反馈）
+ * 三步法蒸馏算法：观察事实→推理性格→验证表达→输出GENE(WHAT+WHY+EVIDENCE+CONFIDENCE)
  *
  * © 2026 iLang Inc., Canada. MIT License.
  */
@@ -24,39 +24,108 @@ function sampleCorpus(text: string, limit: number): string {
   return `${front}\n\n[...中段采样...]\n\n${middle}\n\n[...后段采样...]\n\n${back}`;
 }
 
-function buildDistillPrompt(corpus: string, source: string): string {
+/**
+ * 三步法蒸馏Prompt
+ */
+function buildDistillPrompt(corpus: string, source: string, bioFacts: string): string {
   const today = new Date().toISOString().split("T")[0];
-  return `你是一台表达指纹蒸馏机。以下是来自"${source}"的写作语料。
-请分析这些文字，提取7个维度的写作特征。
+  return `你是一台灵魂蒸馏机。用三步法从语料中提取此人的完整表达DNA。
 
-语料：
+目标人物：${source}
+
+${bioFacts ? `【传记事实（来自百科）】\n${bioFacts}\n` : ""}
+【写作语料】
 ---
 ${corpus}
 ---
 
-请严格按以下I-Lang GENE格式输出，不要输出任何其他内容：
+请严格按三步法执行：
+
+**第一步：观察（列出所有事实，不判断）**
+
+A. 传记事实（如果上方提供了百科信息）：
+   - 生日→星座
+   - 出生地→地域文化
+   - 家庭背景→阶层
+   - 教育经历→知识结构
+   - 职业路径→核心领域
+   - 关键人生事件→转折点
+
+B. 表达事实（从语料中直接统计）：
+   - 开头方式分布
+   - 高频词TOP20和从不用的词
+   - 平均段落长度和长短段交替模式
+   - 反问句频率和风格
+   - 结尾方式分布
+   - 句式特征
+
+**第二步：推理（事实→假设→用语料验证）**
+
+从传记事实产生性格假设，然后用语料验证：
+- 假设被语料验证 → confidence:HIGH
+- 假设被语料部分验证 → confidence:MEDIUM
+- 假设未被语料验证 → 丢弃，不写入
+- 语料中直接观察到的特征（不需要假设）→ confidence:HIGH
+- 假设有但语料不足以验证 → confidence:LOW
+
+权重：一手语料100% > 行为事实70% > 传记事实30% > 星座推断15%
+冲突时语料说了算，推断让路。
+
+**第三步：输出（严格按以下I-Lang GENE格式，不要输出其他任何内容）**
 
 ::ILANG::v4.0
 [TYPE:soul]
 [SOURCE:蒸馏自${source}]
 [DATE:${today}]
 
-::GENE{opening|style:____}
-  T:此人的开头习惯
+[IDENTITY]
+  NAME: ${source}
+  ZODIAC: （从生日推算，没有传记信息则写"未知"）
+  BACKGROUND: （一句话概括此人背景）
+  CORE_TRAIT: （经验证的1-3个核心性格特质）
 
-::GENE{vocabulary|fingerprint:____,____,____|never:____,____}
+::GENE{opening|style:____|confidence:HIGH/MEDIUM/LOW}
+  T: 此人的开头习惯（WHAT）
+  WHY: 为什么这样开头（从传记/性格推断，没有则省略）
+  EVIDENCE: 语料中的具体例子
 
-::GENE{rhythm|avg_para_lines:____|pattern:____}
+::GENE{vocabulary|fingerprint:____,____,____|never:____,____|confidence:HIGH/MEDIUM/LOW}
+  T: 高频特征词和从不用的词
+  WHY: 用词习惯的成因
+  EVIDENCE: 具体出现次数或语料片段
 
-::GENE{question|freq:____|style:____}
+::GENE{rhythm|avg_para_lines:____|pattern:____|confidence:HIGH/MEDIUM/LOW}
+  T: 段落节奏特征
+  WHY: 节奏习惯的成因
+  EVIDENCE: 语料中的典型段落
 
-::GENE{ending|style:____}
+::GENE{question|freq:____|style:____|confidence:HIGH/MEDIUM/LOW}
+  T: 反问句使用特征
+  WHY: 反问风格的成因
+  EVIDENCE: 具体反问句例子
 
-::GENE{tone|style:____}
+::GENE{ending|style:____|confidence:HIGH/MEDIUM/LOW}
+  T: 结尾习惯
+  WHY: 结尾风格的成因
+  EVIDENCE: 语料中的结尾例子
 
-::GENE{audience|profile:____}
+::GENE{tone|style:____|confidence:HIGH/MEDIUM/LOW}
+  T: 整体视角立场
+  WHY: 为什么形成这种立场
+  EVIDENCE: 体现立场的语料片段
 
-只输出I-Lang GENE格式内容。`;
+::GENE{audience|profile:____|confidence:HIGH/MEDIUM/LOW}
+  T: 目标读者画像
+  WHY: 从称呼/假设/用语推断
+  EVIDENCE: 语料中指向读者的表达
+
+[META]
+  FACTS_USED: 使用了多少条传记事实
+  HYPOTHESES_TESTED: 测试了多少条假设
+  HYPOTHESES_VERIFIED: 验证通过了多少条
+  CONFIDENCE_DISTRIBUTION: HIGH:X / MEDIUM:X / LOW:X
+
+只输出上面的I-Lang格式内容。每个GENE的WHY和EVIDENCE尽量填写，填不了的省略该行。`;
 }
 
 function resolveSoulPath(api: any): string {
@@ -101,11 +170,7 @@ function log(api: any, level: string, msg: string, err?: any) {
   fn(err ? `[SoulForge] ${msg}: ${String(err)}` : `[SoulForge] ${msg}`);
 }
 
-/**
- * LLM调用 — 继承当前agent的provider和model
- */
 async function callLLM(api: any, prompt: string): Promise<string> {
-  // 方案1: runEmbeddedAgent（继承当前agent的模型配置）
   if (api?.runtime?.agent?.runEmbeddedAgent) {
     try {
       const cfg = api.config;
@@ -119,18 +184,16 @@ async function callLLM(api: any, prompt: string): Promise<string> {
       const timeoutMs = api.runtime.agent.resolveAgentTimeoutMs
         ? api.runtime.agent.resolveAgentTimeoutMs(cfg)
         : 120000;
-
       const sessionsDir = join(agentDir, "sessions");
       if (!existsSync(sessionsDir)) mkdirSync(sessionsDir, { recursive: true });
 
-      // 继承当前agent的默认模型，不让它fallback到openai
       const defaultModel =
         api?.runtime?.agent?.defaults?.model ||
         cfg?.agents?.defaults?.model ||
         cfg?.models?.default ||
         undefined;
 
-      const embeddedParams: any = {
+      const params: any = {
         sessionId: `soulforge:${runId}`,
         runId,
         sessionFile: join(sessionsDir, `soulforge-${runId}.jsonl`),
@@ -139,21 +202,18 @@ async function callLLM(api: any, prompt: string): Promise<string> {
         timeoutMs,
       };
 
-      // 尝试传model参数（具体字段名取决于SDK版本）
       if (defaultModel) {
-        embeddedParams.model = defaultModel;
-        // 如果model格式是 "provider/model"，也拆开传
         if (typeof defaultModel === "string" && defaultModel.includes("/")) {
           const [provider, model] = defaultModel.split("/", 2);
-          embeddedParams.provider = provider;
-          embeddedParams.model = model;
+          params.provider = provider;
+          params.model = model;
+        } else {
+          params.model = defaultModel;
         }
         log(api, "info", `Using model: ${defaultModel}`);
-      } else {
-        log(api, "warn", "No default model found in agent config, runEmbeddedAgent may use wrong provider");
       }
 
-      const res = await api.runtime.agent.runEmbeddedAgent(embeddedParams);
+      const res = await api.runtime.agent.runEmbeddedAgent(params);
       const text = extractText(res);
       log(api, "info", `runEmbeddedAgent returned ${text.length} chars`);
       return text;
@@ -162,7 +222,6 @@ async function callLLM(api: any, prompt: string): Promise<string> {
     }
   }
 
-  // 方案2: api.llm.complete fallback
   if (api?.llm?.complete) {
     try {
       const res = await api.llm.complete({
@@ -190,27 +249,24 @@ function extractText(r: any): string {
 
 export default function register(api: any) {
   const samplingSize = api?.pluginConfig?.samplingSize || SAMPLING_DEFAULT;
-
   log(api, "info", `SoulForge loaded. samplingSize=${samplingSize}`);
-  log(api, "info", `runEmbeddedAgent: ${!!api?.runtime?.agent?.runEmbeddedAgent}`);
-  log(api, "info", `resolveAgentDir: ${!!api?.runtime?.agent?.resolveAgentDir}`);
-  log(api, "info", `llm.complete: ${!!api?.llm?.complete}`);
 
   // ========== 语料模式 ==========
   api.registerTool({
     name: "soulforge_distill_corpus",
-    description: "蒸馏写作风格：接收文本语料，提取表达指纹，展示预览，用户确认后写入SOUL.md。",
+    description: "三步法蒸馏：接收文本语料（和可选的百科传记信息），用观察→推理→输出三步法提取表达DNA。展示预览，用户确认后写入SOUL.md。",
     parameters: {
       type: "object",
       properties: {
         text: { type: "string", description: "文本语料内容" },
-        source: { type: "string", description: "语料来源（文件名或人名）" },
+        source: { type: "string", description: "语料来源（人名）" },
+        bio: { type: "string", description: "可选。从百科采集的传记信息（生日、教育、职业等事实）。有此字段时蒸馏算法会用三步法的完整推理链。" },
         confirmed: { type: "boolean", description: "false=预览，true=确认写入" },
       },
       required: ["text", "source"],
     },
-    execute: async (_toolCallId: string, params: { text: string; source: string; confirmed?: boolean }) => {
-      const { text, source, confirmed } = params;
+    execute: async (_toolCallId: string, params: { text: string; source: string; bio?: string; confirmed?: boolean }) => {
+      const { text, source, bio, confirmed } = params;
 
       if (!text || text.trim().length < 500) {
         return textResult("语料太短（不足500字），请提供更多内容。");
@@ -219,13 +275,13 @@ export default function register(api: any) {
       const cacheKey = `corpus_${source}`;
 
       if (!confirmed) {
-        log(api, "info", `Distilling "${source}", ${text.length} chars`);
+        log(api, "info", `Distilling "${source}", ${text.length} chars corpus, ${bio?.length || 0} chars bio`);
         const sampled = sampleCorpus(text, samplingSize);
-        const soulContent = await callLLM(api, buildDistillPrompt(sampled, source));
+        const prompt = buildDistillPrompt(sampled, source, bio || "");
+        const soulContent = await callLLM(api, prompt);
 
-        // P1: 区分空输出和格式错
         if (!soulContent.trim()) {
-          return textResult("蒸馏失败：LLM没有返回内容。请查看插件日志（搜索 [SoulForge]）确认 runEmbeddedAgent 或 llm.complete 是否可用。");
+          return textResult("蒸馏失败：LLM没有返回内容。请查看插件日志确认LLM接口是否可用。");
         }
 
         if (!soulContent.includes("::ILANG::v4.0")) {
@@ -237,7 +293,7 @@ export default function register(api: any) {
 
         return textResult(`【数据说明】语料通过你配置的中转站发送给AI模型分析。
 
-【蒸馏预览】从「${source}」提取的写作风格：
+【蒸馏预览】从「${source}」用三步法提取的表达DNA：
 
 ${soulContent}
 
@@ -263,10 +319,10 @@ ${soulContent}
     },
   });
 
-  // ========== 搜索模式：返回结构化任务让agent搜 ==========
+  // ========== 搜索模式 ==========
   api.registerTool({
     name: "soulforge_distill_search",
-    description: "搜索蒸馏模式：输入人名，返回结构化搜索任务。你（agent）执行搜索采集后，把结果传给 soulforge_distill_corpus 完成蒸馏。",
+    description: "搜索蒸馏模式：输入人名，返回结构化采集任务。agent执行采集后，把传记信息和语料一起传给 soulforge_distill_corpus 完成三步法蒸馏。",
     parameters: {
       type: "object",
       properties: {
@@ -278,32 +334,46 @@ ${soulContent}
       const { name } = params;
       log(api, "info", `Search mode initiated for "${name}"`);
 
-      return textResult(`【SoulForge 搜索蒸馏任务】
+      return textResult(`【SoulForge 三步法蒸馏任务】
 
 目标人物：${name}
 
-请你（agent）按以下顺序采集此人的写作语料：
+请你（agent）分两阶段采集，然后调用蒸馏工具。
 
-**第一优先级：百科类（信息最集中）**
+**阶段一：传记事实采集（百科优先）**
+
 第1轮搜索：「${name} 维基百科」—— 用WebFetch读取完整词条
 第2轮搜索：「${name} 百度百科」—— 用WebFetch读取完整词条
-这两篇通常就能拿到生平、著作列表、核心观点、代表性语录。
 
-**第二优先级：一手语料**
-第3轮搜索：「${name} 原文 全文」—— 此人写的文章、书籍片段、演讲原文
-第4轮搜索：「${name} 语录 名言」—— 高频表达、口头禅、金句
-第5轮搜索：「${name} 访谈 对话」—— 问答、即兴回应
+从百科中提取以下事实（有多少提多少）：
+• 生日（精确到日，用于推算星座）
+• 出生地和家庭背景
+• 教育经历
+• 职业路径和关键决策
+• 关键人生事件和转折点
+• 公开争议
 
-每轮搜索后，用WebFetch读取搜索结果中的文章全文，不要只取标题和摘要。
+把这些事实整理成一段文字，作为"传记信息"备用。
 
-信息源排除：不使用知乎。百度百科可以用（事实性信息），但不用知乎（二手洗稿多）。
+**阶段二：一手语料采集**
+
+第3轮搜索：「${name} 原文 全文」—— 此人写的文章、书籍片段
+第4轮搜索：「${name} 语录 名言」—— 高频表达、口头禅
+第5轮搜索：「${name} 演讲 访谈」—— 对话、问答、即兴回应
+
+每轮搜索后用WebFetch读取全文。把所有语料合并，用"---"分隔不同来源。
+
+**阶段三：调用蒸馏**
 
 采集完成后，调用 soulforge_distill_corpus：
-  text: 全部文本（用---分隔不同来源）
+  text: 阶段二采集的全部语料
   source: "${name}"
+  bio: 阶段一整理的传记事实文字
   confirmed: false
 
-目标：至少5000字语料。百科词条通常就有3000-5000字，再加上原文语料就够了。`);
+注意：bio字段很重要，它让蒸馏算法能用三步法（观察事实→推理性格→验证表达），比纯语料分析深一层。
+
+目标：语料至少5000字，传记信息至少500字。`);
     },
   });
 }
