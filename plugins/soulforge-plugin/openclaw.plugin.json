@@ -2,8 +2,8 @@
   "id": "@adsorgcn/soulforge-plugin",
   "name": "@adsorgcn/soulforge-plugin",
   "displayName": "SoulForge 灵魂打印机",
-  "description": "输入人名或语料，蒸馏写作风格。展示预览后经用户确认才写入soul.md，自动备份旧版本。语料通过用户配置的模型提供商进行分析。",
-  "version": "1.0.6",
+  "description": "输入人名或语料，蒸馏写作风格。展示预览后经用户确认才写入SOUL.md，自动备份旧版本（带时间戳）。语料通过用户配置的模型提供商进行分析。",
+  "version": "2.0.0",
   "author": "ilang-ai",
   "homepage": "https://ilang.ai",
   "entryPoint": "dist/index.js",
@@ -11,7 +11,7 @@
     "onStartup": true
   },
   "contracts": {
-    "tools": ["distill_search", "distill_corpus"]
+    "tools": ["soulforge_distill_search", "soulforge_distill_corpus"]
   },
   "configSchema": {
     "type": "object",
@@ -25,18 +25,7 @@
     "required": [],
     "additionalProperties": false
   },
-  "tools": [
-    {
-      "name": "distill_search",
-      "description": "搜索模式蒸馏：输入人名，引导用搜索skill采集资料后蒸馏写作风格。展示预览，用户确认后写入soul.md（自动备份旧版本）。"
-    },
-    {
-      "name": "distill_corpus",
-      "description": "语料模式蒸馏：从Drive读文件或用户粘贴文本，蒸馏写作风格。展示预览，用户确认后写入soul.md（自动备份旧版本）。语料通过用户配置的模型提供商进行分析。"
-    }
-  ],
   "permissions": {
-    "network": ["connect.composio.dev"],
     "filesystem": true,
     "env": false
   }

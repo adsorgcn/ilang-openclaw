@@ -1,9 +1,7 @@
 /**
- * SoulForge — 灵魂打印机
+ * SoulForge — 灵魂打印机 v2.0
  *
- * 两个按钮：
- *   distill_search  — 输入人名 → 搜索采集 → 蒸馏 → 确认后写soul.md
- *   distill_corpus  — 读Drive文件或粘贴文本 → 蒸馏 → 确认后写soul.md
+ * P0-P2 全修版，兼容新版 OpenClaw Plugin SDK
  *
  * © 2026 iLang Inc., Canada. MIT License.
  */
@@ -12,12 +10,12 @@ import { homedir } from "os";
 import { writeFileSync, readFileSync, copyFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 
-const OPENCLAW_DIR = join(homedir(), ".openclaw");
-const SOUL_PATH = join(OPENCLAW_DIR, "soul.md");
-const SOUL_BACKUP_PATH = join(OPENCLAW_DIR, "soul.md.bak");
-const SAMPLING_LIMIT = 50000;
+const SAMPLING_DEFAULT = 50000;
 
-function sampleCorpus(text: string, limit: number = SAMPLING_LIMIT): string {
+// 暂存预览内容，确保确认时写入的和预览的是同一份
+const previewCache = new Map<string, string>();
+
+function sampleCorpus(text: string, limit: number): string {
   if (text.length <= limit) return text;
   const third = Math.floor(limit / 3);
   const front = text.slice(0, third);
@@ -28,6 +26,7 @@ function sampleCorpus(text: string, limit: number = SAMPLING_LIMIT): string {
 }
 
 function buildDistillPrompt(corpus: string, source: string): string {
+  const today = new Date().toISOString().split("T")[0];
   return `你是一台表达指纹蒸馏机。以下是来自"${source}"的写作语料。
 请分析这些文字，提取7个维度的写作特征。
 
@@ -41,63 +40,117 @@ ${corpus}
 ::ILANG::v4.0
 [TYPE:soul]
 [SOURCE:蒸馏自${source}]
-[DATE:${new Date().toISOString().split("T")[0]}]
+[DATE:${today}]
 
 ::GENE{opening|style:____}
-  分析此人的开头习惯：先上数字？先讲故事？先抛问题？先亮观点？
-  用1-2个关键词概括，写在style值里。
-  T:用具体描述补充
+  T:分析此人的开头习惯
 
 ::GENE{vocabulary|fingerprint:____,____,____|never:____,____}
-  fingerprint：此人最高频的10个特征词/口头禅
-  never：此人从不使用的表达
+  fingerprint：高频特征词/口头禅
+  never：从不使用的表达
 
 ::GENE{rhythm|avg_para_lines:____|pattern:____}
-  avg_para_lines：平均每段多少行
-  pattern：长短段交替模式
 
 ::GENE{question|freq:____|style:____}
-  freq：每千字大约多少个反问句
-  style：反问风格
 
 ::GENE{ending|style:____}
-  此人的结尾套路
 
 ::GENE{tone|style:____}
-  整体视角立场
 
 ::GENE{audience|profile:____}
-  从称呼、假设、用语推断的目标读者画像
 
-只输出上面的I-Lang GENE格式内容。不要解释，不要加前言后语。`;
+只输出I-Lang GENE格式内容。`;
 }
 
-function backupAndWriteSoul(content: string): { success: boolean; backedUp: boolean } {
+function resolveSoulPath(api: any): string {
+  // P0-5: 写入 workspace SOUL.md，不是 ~/.openclaw/soul.md
   try {
-    if (!existsSync(OPENCLAW_DIR)) {
-      mkdirSync(OPENCLAW_DIR, { recursive: true });
+    if (api?.runtime?.agent?.resolveAgentWorkspaceDir) {
+      const workspaceDir = api.runtime.agent.resolveAgentWorkspaceDir(api.config);
+      return join(workspaceDir, "SOUL.md");
     }
+  } catch { /* fallback */ }
+
+  // Fallback: 尝试常见路径
+  const workspacePath = join(homedir(), ".openclaw", "workspace", "SOUL.md");
+  if (existsSync(join(homedir(), ".openclaw", "workspace"))) {
+    return workspacePath;
+  }
+  return join(homedir(), ".openclaw", "SOUL.md");
+}
+
+function backupAndWrite(soulPath: string, content: string): { success: boolean; backedUp: boolean; backupPath: string } {
+  try {
+    const dir = join(soulPath, "..");
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+
     let backedUp = false;
-    if (existsSync(SOUL_PATH)) {
-      copyFileSync(SOUL_PATH, SOUL_BACKUP_PATH);
+    let backupPath = "";
+
+    if (existsSync(soulPath)) {
+      // P1-10: 备份带时间戳
+      const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      backupPath = `${soulPath}.bak.${ts}`;
+      copyFileSync(soulPath, backupPath);
       backedUp = true;
     }
-    writeFileSync(SOUL_PATH, content, "utf-8");
-    return { success: true, backedUp };
+
+    writeFileSync(soulPath, content, "utf-8");
+    return { success: true, backedUp, backupPath };
   } catch {
-    return { success: false, backedUp: false };
+    return { success: false, backedUp: false, backupPath: "" };
   }
 }
 
+// P1-8: 标准 ToolResult 格式
+function textResult(text: string) {
+  return { content: [{ type: "text" as const, text }] };
+}
+
+// P1-7: LLM调用兼容层
+async function callLLM(api: any, prompt: string): Promise<string> {
+  // 优先用新版 API
+  if (api?.runtime?.agent?.runEmbeddedAgent) {
+    try {
+      const result = await api.runtime.agent.runEmbeddedAgent({
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+      });
+      return result?.content || result?.text || "";
+    } catch { /* fallback */ }
+  }
+
+  // Fallback: 旧版 api.llm.complete
+  if (api?.llm?.complete) {
+    try {
+      const result = await api.llm.complete({
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+      });
+      return result?.content || result?.text || "";
+    } catch { /* fallback */ }
+  }
+
+  return "";
+}
+
 export default function register(api: any) {
-  api.registerTool("distill_corpus", {
-    description: "语料模式：从Drive读文件或用户粘贴文本，蒸馏写作风格。蒸馏完成后展示结果并请求用户确认，确认后写入soul.md（自动备份旧版本）。",
+  // P1-9: 读取配置
+  const samplingSize = api?.pluginConfig?.samplingSize || SAMPLING_DEFAULT;
+
+  // P0-2/3: 新版 registerTool 签名
+  api.registerTool({
+    // P2-14: 加 soulforge_ 前缀
+    name: "soulforge_distill_corpus",
+    description: "语料模式蒸馏：用户粘贴文本，蒸馏写作风格。展示预览，用户确认后写入SOUL.md（自动备份旧版本）。语料通过用户配置的模型提供商进行分析。",
     parameters: {
       type: "object",
       properties: {
         text: {
           type: "string",
-          description: "用户粘贴的文本内容。如果用户提到Drive文件，先用Drive工具读取内容再传入此参数。",
+          description: "用户粘贴的文本内容。",
         },
         source: {
           type: "string",
@@ -105,71 +158,77 @@ export default function register(api: any) {
         },
         confirmed: {
           type: "boolean",
-          description: "用户是否已确认写入soul.md。首次调用传false，展示预览；用户确认后传true执行写入。",
-          default: false,
+          description: "用户是否已确认写入。首次调用传false展示预览，用户确认后传true执行写入。",
         },
       },
       required: ["text", "source"],
     },
-    execute: async (params: { text: string; source: string; confirmed?: boolean }) => {
+    // P0-3: 新版 execute 签名
+    execute: async (_toolCallId: string, params: { text: string; source: string; confirmed?: boolean }) => {
       const { text, source, confirmed } = params;
 
       if (!text || text.trim().length < 500) {
-        return "语料太短（不足500字），无法蒸馏出可靠的写作风格。请提供更多内容。";
+        return textResult("语料太短（不足500字），无法蒸馏出可靠的写作风格。请提供更多内容。");
       }
 
-      const sampled = sampleCorpus(text);
+      const cacheKey = `corpus_${source}`;
 
-      // 隐私声明
-      const privacyNotice = `【数据说明】你提供的语料将发送给你配置的AI模型进行风格分析。
-• 语料会通过你的中转站或API发送给模型处理，处理方式取决于你选择的模型提供商的隐私政策
-• 蒸馏结果（soul.md）保存在你本机 ~/.openclaw/ 目录
-• 如果你的语料包含敏感信息，建议先脱敏后再投喂`;
-
-      const prompt = buildDistillPrompt(sampled, source);
-
-      try {
-        const result = await api.llm.complete({
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.3,
-        });
-
-        const soulContent = result?.content || result?.text || "";
+      if (!confirmed) {
+        // 第一次：蒸馏 + 预览 + 暂存
+        const sampled = sampleCorpus(text, samplingSize);
+        const prompt = buildDistillPrompt(sampled, source);
+        const soulContent = await callLLM(api, prompt);
 
         if (!soulContent.includes("::ILANG::v4.0")) {
-          return "蒸馏失败：输出格式不符合预期。请重试。";
+          return textResult("蒸馏失败：输出格式不符合预期。请重试。");
         }
 
-        if (!confirmed) {
-          return `${privacyNotice}
+        // P0-6: 暂存预览内容
+        previewCache.set(cacheKey, soulContent);
+
+        // P0-15: 输出目标路径信息
+        const soulPath = resolveSoulPath(api);
+
+        const privacyNotice = `【数据说明】你提供的语料将通过你配置的中转站发送给AI模型进行风格分析。处理方式取决于你选择的模型提供商的隐私政策。如果语料包含敏感信息，建议先脱敏后再投喂。`;
+
+        return textResult(`${privacyNotice}
 
 【蒸馏预览】以下是从「${source}」提取的写作风格：
 
 ${soulContent}
 
-确认使用这个风格吗？确认后将：
-• 备份当前soul.md为soul.md.bak
-• 写入新的soul.md
+【写入信息】
+• 目标路径：${soulPath}
+• 备份策略：写入前自动备份为 SOUL.md.bak.{时间戳}
 
-回复"确认"执行写入。`;
-        }
+确认使用这个风格吗？回复"确认"执行写入。`);
+      }
 
-        const { success, backedUp } = backupAndWriteSoul(soulContent);
+      // 第二次：确认写入（P0-6: 用暂存的预览内容，不重新生成）
+      const cachedContent = previewCache.get(cacheKey);
+      if (!cachedContent) {
+        return textResult("未找到预览内容，请重新运行蒸馏。");
+      }
 
-        if (success) {
-          const backupMsg = backedUp ? "（旧版本已备份为soul.md.bak）" : "";
-          return `你的写作风格已经跟${source}一致，随时可以再次替换为其他风格。${backupMsg}`;
-        } else {
-          return `蒸馏完成，但写入soul.md失败。以下是你的IP人设卡，请手动保存：\n\n${soulContent}`;
-        }
-      } catch (err) {
-        return `蒸馏过程出错：${err}。请重试。`;
+      const soulPath = resolveSoulPath(api);
+      const { success, backedUp, backupPath } = backupAndWrite(soulPath, cachedContent);
+
+      // 写入后清除缓存
+      previewCache.delete(cacheKey);
+
+      if (success) {
+        const backupMsg = backedUp ? `\n旧版本已备份为：${backupPath}` : "";
+        return textResult(`你的写作风格已经跟${source}一致，随时可以再次替换为其他风格。${backupMsg}\n\n写入路径：${soulPath}`);
+      } else {
+        return textResult(`蒸馏完成，但写入SOUL.md失败。以下是你的IP人设卡，请手动保存到 ${soulPath}：\n\n${cachedContent}`);
       }
     },
   });
 
-  api.registerTool("distill_search", {
-    description: "搜索模式：输入人名，引导用户用搜索skill采集资料后蒸馏写作风格。蒸馏完成后展示结果并请求用户确认，确认后写入soul.md（自动备份旧版本）。",
+  api.registerTool({
+    // P2-11/14: 改名为 guide，加前缀
+    name: "soulforge_distill_search",
+    description: "搜索引导模式：输入人名，引导用户用搜索skill采集资料后调用soulforge_distill_corpus蒸馏。本工具不直接搜索，只提供采集指引。",
     parameters: {
       type: "object",
       properties: {
@@ -180,24 +239,24 @@ ${soulContent}
       },
       required: ["name"],
     },
-    execute: async (params: { name: string }) => {
+    execute: async (_toolCallId: string, params: { name: string }) => {
       const { name } = params;
 
-      return `准备蒸馏「${name}」的写作风格。
+      return textResult(`准备蒸馏「${name}」的写作风格。
 
-请先用搜索工具采集以下内容：
+本工具提供采集指引，不直接执行搜索。请先用搜索工具采集以下内容：
+
 1. 此人的公开文章、博客、长文（至少10篇）
 2. 此人的社交媒体发言（微博/X/即刻等）
 3. 此人的演讲或访谈文字稿（如有）
 
-采集完成后，把所有文本内容汇总，然后调用 distill_corpus 工具进行蒸馏。
+【数据说明】采集到的文本将通过你配置的中转站发送给AI模型进行风格分析。处理方式取决于你选择的模型提供商的隐私政策。
 
-【数据说明】采集到的文本将通过你配置的中转站发送给AI模型进行风格分析。处理方式取决于你选择的模型提供商的隐私政策。蒸馏结果保存在你本机。
+采集完成后，把所有文本内容汇总，然后调用 soulforge_distill_corpus 工具进行蒸馏。
 
 提示：
-• 如果你安装了 web-article-reader、agent-reach 等搜索类skill，可以直接使用
-• 如果没有搜索类skill，请先安装一个
-• 采集的内容越多越好，至少需要5000字以上`;
+• 如果你安装了搜索类skill，可以直接使用
+• 采集的内容越多越好，至少需要5000字以上`);
     },
   });
 }
