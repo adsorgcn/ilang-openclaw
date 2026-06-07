@@ -80,10 +80,10 @@ I-Lang GENE格式，自动写入 `~/.openclaw/soul.md`：
 
 | 产品 | 作用 |
 |------|------|
-| SoulForge（本插件）| 造灵魂 |
+| [SoulForge（本插件）](https://clawhub.ai/plugins/@adsorgcn/soulforge-plugin) | 造灵魂 |
 | [WeChat-Awesome](https://clawhub.ai/adsorgcn/WeChat-Awesome) | 用灵魂写公众号爆文 |
 | [DeAI](https://clawhub.ai/adsorgcn/DeAI) | 去AI味编辑 |
-| [freemoney](https://clawhub.ai/adsorgcn/freemoney) | 理赔追踪 |
+| [freemoney-plugin](https://clawhub.ai/plugins/@adsorgcn/freemoney-plugin) | 理赔追踪 |
 
 ## 许可
 
