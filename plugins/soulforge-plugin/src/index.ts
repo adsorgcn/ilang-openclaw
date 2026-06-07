@@ -128,7 +128,7 @@ Call soulforge_distill_corpus with:
       const { text, source, bio } = params;
 
       if (!text || text.trim().length < 500) {
-        return textResult("语料太短（不足500字），请提供更多内容。");
+        return textResult("Corpus too short (under 500 chars). Please provide more content. / 语料太短，请提供更多内容。");
       }
 
       log(api, "info", `Generating distill prompt for "${source}", ${text.length} chars corpus, ${bio?.length || 0} chars bio`);
@@ -144,112 +144,112 @@ Call soulforge_distill_corpus with:
         const midStart = Math.floor(corpus.length / 2 - third / 2);
         const middle = corpus.slice(midStart, midStart + third);
         const back = corpus.slice(-third);
-        corpus = `${front}\n\n[...中段采样...]\n\n${middle}\n\n[...后段采样...]\n\n${back}`;
+        corpus = `${front}\n\n[...middle sample...]\n\n${middle}\n\n[...end sample...]\n\n${back}`;
       }
 
-      const prompt = `你是一台灵魂蒸馏机。用三步法从语料中提取此人的完整表达DNA。
+      const prompt = `You are an expression DNA distiller. Use the three-step method to extract the subject's complete writing fingerprint from their corpus.
 
-目标人物：${source}
+Subject: ${source}
 
-${bio ? `【传记事实（来自百科）】\n${bio}\n` : ""}
-【写作语料】
+${bio ? `[Biographical facts]\n${bio}\n` : ""}
+[Writing corpus]
 ---
 ${corpus}
 ---
 
-请严格按三步法执行：
+Execute strictly in three steps:
 
-**第一步：观察（列出所有事实，不判断）**
+**Step 1: Observe (list all facts, no judgment)**
 
-A. 传记事实（如果上方提供了百科信息）：
-   - 生日→星座
-   - 出生地→地域文化
-   - 家庭背景→阶层
-   - 教育经历→知识结构
-   - 职业路径→核心领域
-   - 关键人生事件→转折点
+A. Biographical facts (if provided above):
+   - Date of birth → zodiac sign
+   - Place of birth → regional culture
+   - Family background → social class
+   - Education → knowledge structure
+   - Career path → domain expertise
+   - Key life events → turning points
 
-B. 表达事实（从语料中直接统计）：
-   - 开头方式分布
-   - 高频词TOP20和从不用的词
-   - 平均段落长度和长短段交替模式
-   - 反问句频率和风格
-   - 结尾方式分布
-   - 句式特征
+B. Expression facts (directly from corpus statistics):
+   - Opening style distribution
+   - Top 20 high-frequency words and never-used words
+   - Average paragraph length and long-short alternation pattern
+   - Rhetorical question frequency and style
+   - Ending style distribution
+   - Sentence structure characteristics
 
-**第二步：推理（事实→假设→用语料验证）**
+**Step 2: Deduce (facts → hypotheses → verify with corpus)**
 
-从传记事实产生性格假设，然后用语料验证：
-- 假设被语料验证 → confidence:HIGH
-- 假设被语料部分验证 → confidence:MEDIUM
-- 假设未被语料验证 → 丢弃，不写入
-- 语料中直接观察到的特征 → confidence:HIGH
-- 假设有但语料不足以验证 → confidence:LOW
+Generate personality hypotheses from biographical facts, then verify with corpus:
+- Hypothesis verified by corpus → confidence:HIGH
+- Hypothesis partially verified → confidence:MEDIUM
+- Hypothesis not verified → discard, do not include
+- Directly observed from corpus (no hypothesis needed) → confidence:HIGH
+- Hypothesis exists but insufficient corpus to verify → confidence:LOW
 
-权重：一手语料100% > 行为事实70% > 传记事实30% > 星座推断15%
-冲突时语料说了算，推断让路。
+Weight: first-person corpus 100% > behavioral facts 70% > biographical facts 30% > zodiac inference 15%
+When in conflict, corpus wins; inferences yield.
 
-**第三步：输出（严格按以下I-Lang GENE格式）**
+**Step 3: Output (strictly follow I-Lang GENE format below)**
 
 ::ILANG::v4.0
 [TYPE:soul]
-[SOURCE:蒸馏自${source}]
+[SOURCE:distilled from ${source}]
 [DATE:${today}]
 
 [IDENTITY]
   NAME: ${source}
-  ZODIAC: （从生日推算，没有传记信息则写"未知"）
-  BACKGROUND: （一句话概括此人背景）
-  CORE_TRAIT: （经验证的1-3个核心性格特质）
+  ZODIAC: (derived from birthdate, or "unknown" if no bio provided)
+  BACKGROUND: (one-sentence summary)
+  CORE_TRAIT: (1-3 verified core personality traits)
 
 ::GENE{opening|style:____|confidence:HIGH/MEDIUM/LOW}
-  T: 此人的开头习惯（WHAT）
-  WHY: 为什么这样开头
-  EVIDENCE: 语料中的具体例子
+  T: opening habit (WHAT)
+  WHY: why this opening style (deduced cause)
+  EVIDENCE: specific examples from corpus
 
 ::GENE{vocabulary|fingerprint:____,____,____|never:____,____|confidence:HIGH/MEDIUM/LOW}
-  T: 高频特征词和从不用的词
-  WHY: 用词习惯的成因
-  EVIDENCE: 具体出现的语料片段
+  T: high-frequency signature words and never-used words
+  WHY: cause of vocabulary habits
+  EVIDENCE: corpus fragments
 
 ::GENE{rhythm|avg_para_lines:____|pattern:____|confidence:HIGH/MEDIUM/LOW}
-  T: 段落节奏特征
-  WHY: 节奏习惯的成因
-  EVIDENCE: 语料中的典型段落
+  T: paragraph rhythm characteristics
+  WHY: cause of rhythm habits
+  EVIDENCE: typical paragraphs from corpus
 
 ::GENE{question|freq:____|style:____|confidence:HIGH/MEDIUM/LOW}
-  T: 反问句使用特征
-  WHY: 反问风格的成因
-  EVIDENCE: 具体反问句例子
+  T: rhetorical question usage
+  WHY: cause of questioning style
+  EVIDENCE: specific examples
 
 ::GENE{ending|style:____|confidence:HIGH/MEDIUM/LOW}
-  T: 结尾习惯
-  WHY: 结尾风格的成因
-  EVIDENCE: 语料中的结尾例子
+  T: ending habit
+  WHY: cause of ending style
+  EVIDENCE: ending examples from corpus
 
 ::GENE{tone|style:____|confidence:HIGH/MEDIUM/LOW}
-  T: 整体视角立场
-  WHY: 为什么形成这种立场
-  EVIDENCE: 体现立场的语料片段
+  T: overall perspective and stance
+  WHY: why this stance formed
+  EVIDENCE: corpus fragments showing stance
 
 ::GENE{audience|profile:____|confidence:HIGH/MEDIUM/LOW}
-  T: 目标读者画像
-  WHY: 从称呼和用语推断
-  EVIDENCE: 语料中指向读者的表达
+  T: target reader profile
+  WHY: deduced from addressing style and assumptions
+  EVIDENCE: reader-facing expressions in corpus
 
 [META]
-  FACTS_USED: 使用了多少条传记事实
-  HYPOTHESES_TESTED: 测试了多少条假设
-  HYPOTHESES_VERIFIED: 验证通过了多少条
+  FACTS_USED: number of biographical facts used
+  HYPOTHESES_TESTED: number of hypotheses tested
+  HYPOTHESES_VERIFIED: number verified
   CONFIDENCE_DISTRIBUTION: HIGH:X / MEDIUM:X / LOW:X
 
-只输出上面的I-Lang格式内容。每个GENE的WHY和EVIDENCE尽量填写。`;
+Output only the I-Lang format above. Fill WHY and EVIDENCE for each GENE when possible.`;
 
-      return textResult(`【蒸馏prompt已生成】
+      return textResult(`[Distillation prompt generated]
 
-请你（agent）直接执行以下prompt，用你当前的模型跑蒸馏分析。
+Execute the prompt below with your current model.
 
-执行完成后，把输出的I-Lang GENE内容传给 soulforge_write 工具：
+After execution, pass the I-Lang GENE output to soulforge_write:
   content: 蒸馏输出的完整SOUL内容
   source: "${source}"
 
