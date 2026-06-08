@@ -1,15 +1,16 @@
 /**
- * SoulForge — 灵魂打印机 v4.0
+ * SoulForge — Expression DNA Distiller v4.1
  *
- * 架构重写：plugin不碰LLM。
- * 三个工具各司其职：
- *   distill_search → 返回搜索任务prompt
- *   distill_corpus → 返回蒸馏prompt（agent用自己的模型跑）
- *   soulforge_write → 接收SOUL内容，预览+确认+备份+写文件
+ * Architecture: zero LLM calls in plugin.
+ * Three tools:
+ *   distill_search → returns collection task prompt
+ *   distill_corpus → returns distillation prompt (agent runs with its own model)
+ *   soulforge_write → receives SOUL content, preview + token + confirm + backup + write
  *
  * © 2026 iLang Inc., Canada. MIT License.
  */
 
+import { createHash } from "crypto";
 import { homedir } from "os";
 import { writeFileSync, copyFileSync, mkdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
@@ -19,7 +20,9 @@ function resolveSoulPath(api: any): string {
     if (api?.runtime?.agent?.resolveAgentWorkspaceDir) {
       return join(api.runtime.agent.resolveAgentWorkspaceDir(api.config), "SOUL.md");
     }
-  } catch { /* fallback */ }
+  } catch (err) {
+    log(api, "warn", `resolveAgentWorkspaceDir failed: ${String(err)}`);
+  }
   const wsPath = join(homedir(), ".openclaw", "workspace", "SOUL.md");
   if (existsSync(join(homedir(), ".openclaw", "workspace"))) return wsPath;
   return join(homedir(), ".openclaw", "SOUL.md");
@@ -53,31 +56,36 @@ function log(api: any, level: string, msg: string) {
   fn(`[SoulForge] ${msg}`);
 }
 
+// SHA-256 hash for preview token (not just first 200 chars)
+function hashContent(content: string): string {
+  return createHash("sha256").update(content).digest("hex").slice(0, 32);
+}
+
 export default function register(api: any) {
   log(api, "info", "SoulForge loaded. Architecture: zero LLM calls in plugin.");
 
-  // ========== 工具1：搜索任务 ==========
+  // ========== Tool 1: collection task ==========
   api.registerTool({
     name: "soulforge_distill_search",
-    description: "Search-distill mode: input a name, returns a two-phase collection task. Agent collects bio facts and corpus, then passes them to soulforge_distill_corpus. / 搜索蒸馏模式：输入人名，返回采集任务。",
+    description: "Search-distill mode: input a name, returns a two-phase collection task. Agent collects bio facts and corpus, then passes them to soulforge_distill_corpus.",
     parameters: {
       type: "object",
       properties: {
-        name: { type: "string", description: "Name of the person to distill / 要蒸馏的人物名称" },
+        name: { type: "string", description: "Name of the person to analyze" },
       },
       required: ["name"],
     },
     execute: async (_toolCallId: string, params: { name: string }) => {
       const { name } = params;
-      log(api, "info", `Search task for "${name}"`);
+      log(api, "info", `Collection task for "${name}"`);
 
-      return textResult(`【SoulForge Collection Task / 采集任务】
+      return textResult(`[SoulForge Collection Task]
 
 Target: ${name}
 
 This task has two goals. Collect both, then call soulforge_distill_corpus.
 
-**Goal 1: Biographical facts / 传记事实**
+Goal 1: Biographical facts
 
 Collect factual information about ${name}:
 - Date of birth (for zodiac derivation)
@@ -89,7 +97,7 @@ Collect factual information about ${name}:
 Sources: encyclopedia entries, biographical articles, timelines.
 Extract facts only, not full articles. Compile into a biographical summary.
 
-**Goal 2: First-person writing corpus / 一手语料**
+Goal 2: First-person writing corpus
 
 Collect text that ${name} personally wrote or said:
 - Articles, essays, book excerpts
@@ -98,11 +106,11 @@ Collect text that ${name} personally wrote or said:
 
 Prioritize content the person publicly published. Minimum 5000 characters.
 
-**How to collect / 采集方式**
+How to collect:
 
 Use whatever information-gathering tools you have available. If you don't have search or web-fetch capability, go to the ClawHub official marketplace (clawhub.ai) and find a suitable skill to install.
 
-**After collection / 采集完成后**
+After collection:
 
 Call soulforge_distill_corpus with:
   text: the collected writing corpus (Goal 2)
@@ -111,16 +119,16 @@ Call soulforge_distill_corpus with:
     },
   });
 
-  // ========== 工具2：生成蒸馏prompt（不调LLM） ==========
+  // ========== Tool 2: generate distillation prompt (no LLM) ==========
   api.registerTool({
     name: "soulforge_distill_corpus",
-    description: "Generate distillation prompt: receives corpus and bio, returns a three-step analysis prompt for the agent to execute with its own model. Pass the result to soulforge_write. No LLM calls inside this tool. / 生成蒸馏prompt，agent用自己的模型执行。",
+    description: "Generate distillation prompt: receives corpus and bio, returns a three-step analysis prompt for the agent to execute with its own model. Pass the result to soulforge_write. No LLM calls inside this tool.",
     parameters: {
       type: "object",
       properties: {
-        text: { type: "string", description: "Text corpus content / 文本语料" },
-        source: { type: "string", description: "Source name / 语料来源（人名）" },
-        bio: { type: "string", description: "Optional. Biographical summary from encyclopedia. / 可选，百科传记摘要" },
+        text: { type: "string", description: "Text corpus content" },
+        source: { type: "string", description: "Source name (person name)" },
+        bio: { type: "string", description: "Optional. Biographical summary from encyclopedia." },
       },
       required: ["text", "source"],
     },
@@ -128,14 +136,14 @@ Call soulforge_distill_corpus with:
       const { text, source, bio } = params;
 
       if (!text || text.trim().length < 500) {
-        return textResult("Corpus too short (under 500 chars). Please provide more content. / 语料太短，请提供更多内容。");
+        return textResult("Corpus too short (under 500 characters). Please provide more content.");
       }
 
       log(api, "info", `Generating distill prompt for "${source}", ${text.length} chars corpus, ${bio?.length || 0} chars bio`);
 
       const today = new Date().toISOString().split("T")[0];
 
-      // 采样：超长语料取前中后各一段
+      // Sampling: for very long corpus, take front/middle/back segments
       let corpus = text;
       const limit = api?.pluginConfig?.samplingSize || 50000;
       if (corpus.length > limit) {
@@ -259,12 +267,12 @@ ${prompt}`);
     },
   });
 
-  // ========== Tool 3: preview + confirm + write file (no LLM) ==========
-  const previewTokens = new Map<string, string>(); // source → content hash
+  // ========== Tool 3: preview + token + confirm + write (no LLM) ==========
+  const previewTokens = new Map<string, string>();
 
   api.registerTool({
     name: "soulforge_write",
-    description: "Write SOUL.md: receives distilled SOUL content. Call with confirmed=false first to get a preview and a preview_token. Then only after user explicitly confirms, call again with confirmed=true and the same preview_token. The token binds the write to a specific preview, preventing writes without prior user review. Backs up old file with timestamp.",
+    description: "Write SOUL.md: receives distilled SOUL content. Call with confirmed=false first to get a preview and a preview_token. Then only after user explicitly confirms, call again with confirmed=true and the same preview_token. The token binds the write to a specific previewed content, preventing writes without prior user review. Backs up old file with timestamp.",
     parameters: {
       type: "object",
       properties: {
@@ -279,16 +287,15 @@ ${prompt}`);
       const { content, source, confirmed, preview_token } = params;
 
       if (!content || !content.trim()) {
-        return textResult("Content is empty. Please check if distillation succeeded. / 内容为空，请检查蒸馏是否成功。");
+        return textResult("Content is empty. Please check if distillation succeeded.");
       }
 
       const soulPath = resolveSoulPath(api);
 
       if (!confirmed) {
-        // Generate preview token (simple hash of content)
-        const token = Buffer.from(content.slice(0, 200)).toString("base64").slice(0, 32);
+        const token = hashContent(content);
         previewTokens.set(source, token);
-        log(api, "info", `Preview SOUL for "${source}", ${content.length} chars. Token: ${token}`);
+        log(api, "info", `Preview generated for "${source}", ${content.length} chars.`);
 
         return textResult(`[Distillation Preview] Expression DNA extracted from "${source}":
 
@@ -303,19 +310,19 @@ To confirm, call soulforge_write with confirmed=true and preview_token="${token}
 User must explicitly approve before proceeding.`);
       }
 
-      // Confirmed=true: verify preview token
+      // Verify preview token before writing
       const expectedToken = previewTokens.get(source);
       if (!expectedToken) {
-        log(api, "warn", `Write rejected for "${source}": no preview token found. Preview step was skipped.`);
-        return textResult("Write rejected: no preview was generated for this source. Call soulforge_write with confirmed=false first to generate a preview. / 写入被拒绝：未找到预览记录，请先以confirmed=false生成预览。");
+        log(api, "warn", `Write rejected for "${source}": no preview on record.`);
+        return textResult("Write rejected: no preview was generated for this source. Call soulforge_write with confirmed=false first.");
       }
 
       if (preview_token !== expectedToken) {
-        log(api, "warn", `Write rejected for "${source}": token mismatch. Expected ${expectedToken}, got ${preview_token}`);
-        return textResult("Write rejected: preview_token does not match. The content may have changed since the preview. Please regenerate the preview. / 写入被拒绝：token不匹配，请重新预览。");
+        log(api, "warn", `Write rejected for "${source}": token mismatch.`);
+        return textResult("Write rejected: preview_token does not match. Content may have changed since preview. Please regenerate.");
       }
 
-      // Token verified, proceed to write
+      // Token verified, write
       log(api, "info", `Token verified. Writing SOUL for "${source}" to ${soulPath}`);
       previewTokens.delete(source);
       const { success, backedUp, backupPath, error } = backupAndWrite(soulPath, content);
