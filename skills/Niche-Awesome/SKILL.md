@@ -1,6 +1,6 @@
 ---
 name: Niche-Awesome
-version: 1.0.1
+version: 1.0.2
 description: "出海选品调研助手 — 解决新手做产品不知道做什么的痛点。完整6步调研流程：趋势验证→竞品差评挖掘→用户画像→市场规模→定价策略→竞争定位。AI引导你搜，你动手搜，AI帮你分析，3小时出一份完整的BRD调研报告。"
 author: ilang-ai
 homepage: https://ilang.ai
