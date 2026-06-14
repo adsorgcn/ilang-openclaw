@@ -15,8 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
 
       - name: 安装 SkillHub CLI
         run: |
@@ -24,28 +22,34 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: 登录 SkillHub
-        run: skillhub auth login --token "${{ secrets.SKILLHUB_TOKEN }}" --host https://api.skillhub.cn
-
-      - name: 发布全部技能
         run: |
-          PUBLISHED=""
-          FAILED=""
+          skillhub auth login --token "${{ secrets.SKILLHUB_TOKEN }}" --host https://api.skillhub.cn
+          skillhub auth whoami
 
-          for dir in skills/*/; do
-            dir_name=$(basename "$dir")
-            [ ! -f "skills/$dir_name/SKILL.md" ] && continue
-
-            echo ">>> 发布 skills/$dir_name ..."
-
-            skillhub publish "skills/$dir_name" \
-              --changelog "Auto-published from GitHub commit ${{ github.sha }}" \
-              && PUBLISHED="$PUBLISHED $dir_name" \
-              || FAILED="$FAILED $dir_name"
+      - name: 逐个发布技能
+        run: |
+          SKILLS="Niche-Awesome DeAI WeChat-Awesome freemoney lazarus everything-is-ok ilang-compress less-token no-prompt"
+          
+          for skill in $SKILLS; do
+            echo ""
+            echo "========================================="
+            echo ">>> 正在发布: $skill"
+            echo "========================================="
+            
+            if [ ! -f "skills/$skill/SKILL.md" ]; then
+              echo ">>> 跳过: SKILL.md不存在"
+              continue
+            fi
+            
+            cd "skills/$skill"
+            skillhub publish . --changelog "GitHub auto-publish ${{ github.sha }}" 2>&1 || true
+            cd ../..
+            
+            echo ">>> 等待10秒..."
+            sleep 10
           done
-
+          
           echo ""
           echo "========================================="
-          [ -n "$PUBLISHED" ] && echo "✅ 成功:$PUBLISHED"
-          [ -n "$FAILED" ] && echo "⚠️ 失败（版本已存在或其他原因）:$FAILED"
-          [ -z "$PUBLISHED" ] && [ -z "$FAILED" ] && echo ">>> 未找到技能"
+          echo ">>> 全部完成"
           echo "========================================="
