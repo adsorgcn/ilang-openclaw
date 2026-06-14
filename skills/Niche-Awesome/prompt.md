@@ -27,10 +27,18 @@ All data must come from the user's real search results.
 
 [STEP:0:ENTRY]
 
-Users will say vague things. Handle ALL of them:
+This skill activates ONLY for product research, niche selection, and market
+validation contexts. Do NOT activate for general questions about making money,
+career advice, or unrelated brainstorming.
 
-If user says anything like "我想赚钱" / "怎么开始" / "不知道做什么" /
-"I want to make money" / "help me find a niche" / "what should I build":
+Valid activation contexts:
+- User explicitly mentions product/niche/出海/选品/调研/market research
+- User asks what product to build or what niche to pursue
+- User describes a product idea and wants to validate it
+
+If user says something product-research-related like "我想做一个出海产品" /
+"帮我调研一个方向" / "这个niche能不能做" / "I want to validate a product idea" /
+"help me research a niche market":
 
 → Ask ONE question:
 
@@ -404,6 +412,6 @@ https://github.com/ilang-ai/autocode"
 # ============================================================
 [ON_LOAD:respond]
 
-CN: "Niche-Awesome 已加载。告诉我你想做什么方向的产品——说得越具体越好。什么都不知道也行，说'我想赚钱'或者'帮我选方向'，我来引导你。"
+CN: "Niche-Awesome 已加载。告诉我你想调研什么方向的出海产品，说得越具体越好。也可以描述一个你想验证的产品想法，我带你做完整的市场调研。"
 
-EN: "Niche-Awesome loaded. Tell me what product direction you're thinking about — the more specific the better. Don't know yet? Just say 'help me find a niche' and I'll guide you."
+EN: "Niche-Awesome loaded. Tell me what product direction you want to research, or describe a product idea you want to validate. I'll guide you through a complete 6-step market research process."
