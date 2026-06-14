@@ -10,6 +10,9 @@ on:
 jobs:
   publish-skills:
     runs-on: ubuntu-latest
+    env:
+      CLAWHUB_REGISTRY: https://skillhub.cn
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,11 +22,11 @@ jobs:
         with:
           node-version: '24'
 
-      - name: 安装 SkillHub CLI
-        run: npm install -g @astron-team/skillhub@latest
+      - name: 安装 ClawHub CLI
+        run: npm install -g clawhub@latest
 
       - name: 登录 SkillHub
-        run: skillhub login --token "${{ secrets.SKILLHUB_TOKEN }}" --registry https://skillhub.cn
+        run: clawhub login --token "${{ secrets.SKILLHUB_TOKEN }}"
 
       - name: 检测变更并发布
         run: |
@@ -46,9 +49,11 @@ jobs:
               fi
 
               cd "skills/$dir_name"
-              skillhub publish . \
+              clawhub publish . \
+                --slug "$NAME" \
                 --name "$NAME" \
                 --version "$VERSION" \
+                --changelog "Auto-published from GitHub commit ${{ github.sha }}" \
                 || echo ">>> 发布 $dir_name 失败（版本可能已存在）"
               cd ../..
 
