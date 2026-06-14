@@ -1,7 +1,8 @@
 ---
 name: ilang-compress
 version: 2.3.2
-description: "Compress natural language prompts into I-Lang — AI-native structured instructions. 40-65% token savings. Output is text notation only — review before passing to execution agents."
+author: ilang-ai
+description: "I-Lang压缩引擎 — I-Lang协议的核心压缩工具。88个动词+29个修饰符+14个实体，把自然语言提示词压缩到极致。适合进阶用户和开发者。"
 homepage: https://ilang.ai
 metadata:
   clawdbot:

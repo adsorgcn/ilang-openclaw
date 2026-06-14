@@ -1,7 +1,7 @@
 ---
 name: DeAI
 version: 1.1.3
-description: "DeAI — Improve AI-drafted text to sound naturally human. Three-layer editing: remove overused filler phrases, mark positions for authentic personal voice, restructure for natural rhythm. Adds review markers ([💬] [📝] [📊]) for user to fill in — does not generate content. Supports Chinese, English, Japanese, Korean."
+description: "去AI味编辑器 — 让AI写的东西听起来像你自己写的。三层编辑：删掉AI指纹词→标注该加口语的位置→调节句子节奏。支持中文、英文、日文、韩文。"
 author: ilang-ai
 homepage: https://ilang.ai
 tags:

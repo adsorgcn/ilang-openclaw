@@ -1,6 +1,6 @@
 ---
 name: everything-is-ok
-description: "无所不能 — Universal prompt compression protocol. Translate natural language into compressed I-Lang syntax (save 40-65% tokens). Text-to-text translator only — does not access files, URLs, or external resources. Works with ChatGPT, Claude, Gemini, DeepSeek, Kimi. Instruction-only, no code, no credentials."
+description: "万能提示词压缩 — 把你说的大白话压缩成I-Lang格式的精简指令，省40-65%的token。任何AI都能用，不需要学任何语法。"
 version: 1.0.4
 author: ilang-ai
 homepage: https://ilang.ai

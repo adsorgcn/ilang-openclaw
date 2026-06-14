@@ -1,7 +1,7 @@
 ---
 name: Niche-Awesome
 version: 1.0.1
-description: "Niche-Awesome — Solve the #1 problem for beginners building AI products: not knowing what to build. A complete 6-step BRD (Business Requirements Document) research process for niche product selection and market validation. Activates when user wants to research a product direction, validate a niche market, or find a profitable product idea for going global. You do the searching, AI does the analysis. Works with any AI, no coding required."
+description: "出海选品调研助手 — 解决新手做产品不知道做什么的痛点。完整6步调研流程：趋势验证→竞品差评挖掘→用户画像→市场规模→定价策略→竞争定位。AI引导你搜，你动手搜，AI帮你分析，3小时出一份完整的BRD调研报告。"
 author: ilang-ai
 homepage: https://ilang.ai
 tags:
