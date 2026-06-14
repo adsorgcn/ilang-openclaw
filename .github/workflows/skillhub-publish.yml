@@ -11,22 +11,19 @@ jobs:
   publish-skills:
     runs-on: ubuntu-latest
     env:
-      CLAWHUB_REGISTRY: https://skillhub.cn
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-
-      - name: 安装 ClawHub CLI
-        run: npm install -g clawhub@latest
+      - name: 安装 SkillHub CLI
+        run: |
+          curl -fsSL https://skillhub.cn/install/install.sh | bash -s -- --cli-only
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: 登录 SkillHub
-        run: clawhub login --token "${{ secrets.SKILLHUB_TOKEN }}"
+        run: skillhub auth login --token "${{ secrets.SKILLHUB_TOKEN }}" --host https://api.skillhub.cn
 
       - name: 检测变更并发布
         run: |
@@ -40,24 +37,11 @@ jobs:
             if echo "$CHANGED_FILES" | grep -q "^skills/$dir_name/"; then
               echo ">>> 检测到 skills/$dir_name 有变更，发布中..."
 
-              VERSION=$(grep '^version:' "skills/$dir_name/SKILL.md" | head -1 | awk '{print $2}' | tr -d '"' | tr -d "'")
-              NAME=$(grep '^name:' "skills/$dir_name/SKILL.md" | head -1 | awk '{print $2}' | tr -d '"' | tr -d "'")
-
-              if [ -z "$VERSION" ]; then
-                echo ">>> skills/$dir_name/SKILL.md 中未找到版本号，跳过"
-                continue
-              fi
-
-              cd "skills/$dir_name"
-              clawhub publish . \
-                --slug "$NAME" \
-                --name "$NAME" \
-                --version "$VERSION" \
+              skillhub publish "skills/$dir_name" \
                 --changelog "Auto-published from GitHub commit ${{ github.sha }}" \
-                || echo ">>> 发布 $dir_name 失败（版本可能已存在）"
-              cd ../..
+                || echo ">>> 发布 $dir_name 失败（版本可能已存在或slug冲突）"
 
-              PUBLISHED="$PUBLISHED $NAME@$VERSION"
+              PUBLISHED="$PUBLISHED $dir_name"
             fi
           done
 

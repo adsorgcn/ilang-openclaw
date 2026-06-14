@@ -1,6 +1,11 @@
 ---
 name: ilang-compress
 version: 2.3.2
+slug: ilang-compress
+displayName: "I-Lang压缩引擎"
+summary: "88个动词+29个修饰符+14个实体，极致压缩"
+tags: [compression, ilang, advanced]
+license: MIT
 author: ilang-ai
 description: "I-Lang压缩引擎 — I-Lang协议的核心压缩工具。88个动词+29个修饰符+14个实体，把自然语言提示词压缩到极致。适合进阶用户和开发者。"
 homepage: https://ilang.ai

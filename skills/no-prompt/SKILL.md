@@ -2,20 +2,13 @@
 name: no-prompt
 description: "自然语言即标准提示词 — 不用学提示词工程。用你自己的话描述你想干什么，AI帮你写一条结构化指令，直接复制到任何AI里用。"
 version: 1.0.2
+slug: no-prompt
+displayName: "自然语言即标准提示词"
+summary: "说人话，AI帮你写结构化指令，零门槛"
+tags: [prompt, beginner, no-code]
+license: MIT
 author: ilang-ai
-homepage: https://ilang.ai
-tags:
-  - prompt-engineering
-  - prompt-optimizer
-  - prompt-generator
-  - no-code
-  - beginner-friendly
-  - cross-platform
-  - ai-communication
-  - productivity
-  - automation
-  - universal
----
+homepage: https://ilang.ai---
 
 # No Prompt
 

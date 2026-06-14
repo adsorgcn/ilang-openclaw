@@ -1,18 +1,14 @@
 ---
 name: Niche-Awesome
 version: 1.0.2
+slug: niche-awesome
+displayName: "出海选品调研助手"
+summary: "6步调研流程，3小时从不知道做什么到完整BRD报告"
+tags: [niche, research, product, monetization]
+license: MIT
 description: "出海选品调研助手 — 解决新手做产品不知道做什么的痛点。完整6步调研流程：趋势验证→竞品差评挖掘→用户画像→市场规模→定价策略→竞争定位。AI引导你搜，你动手搜，AI帮你分析，3小时出一份完整的BRD调研报告。"
 author: ilang-ai
-homepage: https://ilang.ai
-tags:
-  - niche
-  - research
-  - product
-  - market
-  - monetization
-  - indie-hacker
-  - beginner
----
+homepage: https://ilang.ai---
 
 # Niche-Awesome — 解决新手AI做产品，不知道做什么的痛点
 

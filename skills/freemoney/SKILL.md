@@ -2,19 +2,13 @@
 name: freemoney
 description: "白拿钱 — 美国、加拿大、英国、澳洲集体诉讼理赔追踪技能。监控多国开放案件，筛选免凭证案件。数据源覆盖OpenClassActions、TopClassActions、ClaimDepot及各国官方公告。纯中文交互，I-Lang v4.0协议驱动。被动查询工具，不主动推送（推送功能见freemoney-plugin插件版）。"
 version: 1.3.0
+slug: freemoney
+displayName: "白拿钱"
+summary: "美加英澳集体诉讼免证据理赔追踪"
+tags: [money, legal, settlement]
+license: MIT
 author: ilang-ai
-homepage: https://ilang.ai
-tags:
-  - money
-  - class-action
-  - settlement
-  - claims
-  - no-proof
-  - passive-income
-  - chinese
-  - automation
-  - tracking
----
+homepage: https://ilang.ai---
 
 # Free Money（白拿钱）
 

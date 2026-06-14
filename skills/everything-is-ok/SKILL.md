@@ -2,20 +2,13 @@
 name: everything-is-ok
 description: "万能提示词压缩 — 把你说的大白话压缩成I-Lang格式的精简指令，省40-65%的token。任何AI都能用，不需要学任何语法。"
 version: 1.0.4
+slug: everything-is-ok
+displayName: "万能提示词压缩"
+summary: "大白话变I-Lang精简指令，省40-65% token"
+tags: [compression, token-saving, productivity]
+license: MIT
 author: ilang-ai
-homepage: https://ilang.ai
-tags:
-  - prompt
-  - productivity
-  - compression
-  - token-saving
-  - cross-platform
-  - communication
-  - optimization
-  - ai-assistant
-  - workflow
-  - universal
----
+homepage: https://ilang.ai---
 
 # Everything is OK（无所不能）
 
