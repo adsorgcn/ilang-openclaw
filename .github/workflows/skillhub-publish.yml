@@ -4,14 +4,15 @@ on:
   push:
     branches: [main]
     paths:
-      - 'skills/*/SKILL.md'
-      - 'skills/*/prompt.md'
+      - 'skills/**'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   publish-skills:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,28 +26,26 @@ jobs:
       - name: 登录 SkillHub
         run: skillhub auth login --token "${{ secrets.SKILLHUB_TOKEN }}" --host https://api.skillhub.cn
 
-      - name: 检测变更并发布
+      - name: 发布全部技能
         run: |
-          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
           PUBLISHED=""
+          FAILED=""
 
           for dir in skills/*/; do
             dir_name=$(basename "$dir")
             [ ! -f "skills/$dir_name/SKILL.md" ] && continue
 
-            if echo "$CHANGED_FILES" | grep -q "^skills/$dir_name/"; then
-              echo ">>> 检测到 skills/$dir_name 有变更，发布中..."
+            echo ">>> 发布 skills/$dir_name ..."
 
-              skillhub publish "skills/$dir_name" \
-                --changelog "Auto-published from GitHub commit ${{ github.sha }}" \
-                || echo ">>> 发布 $dir_name 失败（版本可能已存在或slug冲突）"
-
-              PUBLISHED="$PUBLISHED $dir_name"
-            fi
+            skillhub publish "skills/$dir_name" \
+              --changelog "Auto-published from GitHub commit ${{ github.sha }}" \
+              && PUBLISHED="$PUBLISHED $dir_name" \
+              || FAILED="$FAILED $dir_name"
           done
 
-          if [ -z "$PUBLISHED" ]; then
-            echo ">>> 未检测到技能变更"
-          else
-            echo ">>> 已发布到 SkillHub:$PUBLISHED"
-          fi
+          echo ""
+          echo "========================================="
+          [ -n "$PUBLISHED" ] && echo "✅ 成功:$PUBLISHED"
+          [ -n "$FAILED" ] && echo "⚠️ 失败（版本已存在或其他原因）:$FAILED"
+          [ -z "$PUBLISHED" ] && [ -z "$FAILED" ] && echo ">>> 未找到技能"
+          echo "========================================="
