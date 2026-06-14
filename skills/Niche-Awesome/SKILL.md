@@ -1,6 +1,6 @@
 ---
 name: Niche-Awesome
-version: 1.0.3
+version: 1.0.4
 slug: niche-awesome
 displayName: "出海选品调研助手"
 summary: "6步调研流程，3小时从不知道做什么到完整BRD报告"
@@ -123,7 +123,6 @@ Research done, direction confirmed. Next step: build with [AutoCode](https://git
 | Resource | Link |
 |----------|------|
 | I-Lang Protocol | [ilang.ai](https://ilang.ai) |
-| 跨境风向标 | 微信公众号"跨境风向标" / 免费知识星球，每天发布出海新动向 |
 | AutoCode | [ilang-ai/autocode](https://github.com/ilang-ai/autocode) |
 | ZeroCode | [Trae Plugin](https://gitee.com/palmmedia/iLang-Trae-Plugin) |
 | OpenClaw Skills | [ilang-ai/ilang-openclaw](https://github.com/ilang-ai/ilang-openclaw) |

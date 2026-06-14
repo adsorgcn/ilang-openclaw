@@ -67,7 +67,6 @@
 | 资源 | 链接 |
 |------|------|
 | I-Lang 协议 | [ilang.ai](https://ilang.ai) |
-| 跨境风向标 | 微信公众号 / 免费知识星球，每天发布出海新动向 |
 | AutoCode | [ilang-ai/autocode](https://github.com/ilang-ai/autocode) |
 | ZeroCode | [Trae 插件](https://gitee.com/palmmedia/iLang-Trae-Plugin) |
 | 干活AI | [ganhuo.ai](https://ganhuo.ai) |
