@@ -132,3 +132,4 @@ Research done, direction confirmed. Next step: build with [AutoCode](https://git
 MIT
 
 © 2026 iLang Inc., Canada.
+

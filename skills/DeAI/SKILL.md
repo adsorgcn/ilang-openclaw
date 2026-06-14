@@ -125,3 +125,4 @@ AI 초안을 자연스러운 글로 편집하는 도구입니다. `prompt.md`를
 MIT
 
 © 2026 iLang Inc., Canada.
+
