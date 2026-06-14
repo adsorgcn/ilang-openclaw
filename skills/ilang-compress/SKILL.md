@@ -1,7 +1,7 @@
 ---
 name: ilang-compress
 version: 2.3.2
-slug: ilang-compress
+slug: ilang-compress-skill
 displayName: "I-Lang压缩引擎"
 summary: "88个动词+29个修饰符+14个实体，极致压缩"
 tags: [compression, ilang, advanced]

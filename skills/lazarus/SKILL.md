@@ -2,7 +2,7 @@
 name: lazarus
 description: "纯原创内容生成 — 从已关闭的网站中恢复有价值的内容，经过AI重组和改写，生成全新的纯原创内容。配合AutoCode一键部署上线。"
 version: 1.0.5
-slug: lazarus
+slug: ilang-lazarus
 displayName: "纯原创内容生成"
 summary: "从已关闭网站恢复内容，AI重组改写生成纯原创"
 tags: [content, seo, original]

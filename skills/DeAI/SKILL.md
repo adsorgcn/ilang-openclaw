@@ -1,7 +1,7 @@
 ---
 name: DeAI
 version: 1.1.3
-slug: deai
+slug: ilang-deai
 displayName: "去AI味编辑器"
 summary: "三层编辑让AI文字听起来像你自己写的，支持中英日韩"
 tags: [writing, editing, authenticity, multilingual]

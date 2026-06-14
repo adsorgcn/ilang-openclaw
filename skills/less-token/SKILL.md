@@ -2,7 +2,7 @@
 name: less-token
 description: "省Token技能 — 专治冗长的摘要指令。一段话的摘要提示词压缩成一行I-Lang指令，省40-65%的token。"
 version: 1.0.4
-slug: less-token
+slug: ilang-less-token
 displayName: "省Token技能"
 summary: "冗长摘要指令压缩成一行I-Lang指令"
 tags: [compression, summarize, token-saving]

@@ -1,7 +1,7 @@
 ---
 name: WeChat-Awesome
 version: 1.1.4
-slug: wechat-awesome
+slug: ilang-wechat-awesome
 displayName: "微信公众号写作助手"
 summary: "17条写作基因+10项自查，素材到爆文一条龙"
 tags: [wechat, writing, content]
