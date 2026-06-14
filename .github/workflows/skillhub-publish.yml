@@ -1,0 +1,70 @@
+name: Publish to Tencent SkillHub
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/*/SKILL.md'
+      - 'skills/*/prompt.md'
+
+jobs:
+  publish-skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed skills and publish to SkillHub
+        env:
+          SKILLHUB_TOKEN: ${{ secrets.SKILLHUB_TOKEN }}
+          SKILLHUB_URL: ${{ secrets.SKILLHUB_URL }}
+        run: |
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          PUBLISHED=""
+
+          for dir in skills/*/; do
+            dir_name=$(basename "$dir")
+            [ ! -f "skills/$dir_name/SKILL.md" ] && continue
+
+            if echo "$CHANGED_FILES" | grep -q "^skills/$dir_name/"; then
+              echo ">>> Changes detected in skills/$dir_name, publishing..."
+
+              VERSION=$(grep '^version:' "skills/$dir_name/SKILL.md" | head -1 | awk '{print $2}' | tr -d '"' | tr -d "'")
+              NAME=$(grep '^name:' "skills/$dir_name/SKILL.md" | head -1 | awk '{print $2}' | tr -d '"' | tr -d "'")
+
+              if [ -z "$VERSION" ]; then
+                echo ">>> No version found in skills/$dir_name/SKILL.md, skipping"
+                continue
+              fi
+
+              # Package skill as tar.gz
+              cd "skills/$dir_name"
+              tar -czf "/tmp/${NAME}-${VERSION}.tar.gz" SKILL.md prompt.md
+              cd ../..
+
+              # Publish to SkillHub via REST API
+              HTTP_CODE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+                -X POST "${SKILLHUB_URL}/api/v1/skills/publish" \
+                -H "Authorization: Bearer ${SKILLHUB_TOKEN}" \
+                -H "Content-Type: multipart/form-data" \
+                -F "name=${NAME}" \
+                -F "version=${VERSION}" \
+                -F "changelog=Auto-published from GitHub commit ${{ github.sha }}" \
+                -F "file=@/tmp/${NAME}-${VERSION}.tar.gz")
+
+              if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+                echo ">>> Published $NAME@$VERSION to SkillHub (HTTP $HTTP_CODE)"
+                PUBLISHED="$PUBLISHED $NAME@$VERSION"
+              else
+                echo ">>> Failed to publish $NAME@$VERSION (HTTP $HTTP_CODE)"
+                cat /tmp/response.json
+              fi
+            fi
+          done
+
+          if [ -z "$PUBLISHED" ]; then
+            echo ">>> No skill changes detected"
+          else
+            echo ">>> Published to SkillHub:$PUBLISHED"
+          fi
