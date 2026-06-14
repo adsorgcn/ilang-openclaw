@@ -1,7 +1,7 @@
 # I-Lang OpenClaw — Skills + Plugins
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Skills](https://img.shields.io/badge/Skills-8%20Published-blue)](#skills)
+[![Skills](https://img.shields.io/badge/Skills-9%20Published-blue)](#skills)
 [![Plugins](https://img.shields.io/badge/Plugins-2%20Published-blue)](#plugins)
 [![Protocol](https://img.shields.io/badge/I--Lang-v4.0-purple)](https://ilang.ai)
 
@@ -23,7 +23,8 @@ ilang-openclaw/
 │   ├── everything-is-ok/← Universal prompt compression
 │   ├── no-prompt/       ← AI writes prompts for you
 │   ├── less-token/      ← Compress prompts, save tokens
-│   └── ilang-compress/  ← Original I-Lang compression engine
+│   ├── ilang-compress/  ← Original I-Lang compression engine
+│   └── Niche-Awesome/  ← 出海选品调研：不知道做什么？3小时帮你找到方向
 ├── plugins/             ← Code plugins for OpenClaw runtime
 │   └── freemoney-plugin/← 白拿钱 native OpenClaw integration
 │   └── soulforge-plugin/← 灵魂打印机：蒸馏写作风格 → soul.md
@@ -39,6 +40,16 @@ ilang-openclaw/
 Three-layer DeAI: clean filler phrases, mark positions for authentic voice, restructure for natural rhythm. Supports Chinese, English, Japanese, Korean.
 
 [**Install on ClawHub**](https://clawhub.ai/adsorgcn/DeAI) | [**Details**](./skills/DeAI/SKILL.md)
+
+---
+
+### Niche-Awesome `v1.0.0` -- 解决新手AI做产品，不知道做什么的痛点
+
+90%的独立开发者第一步就走错了：先写代码，做完才发现没人要。Niche-Awesome是一套完整的6步调研流程（趋势验证→竞品差评挖掘→用户画像→市场规模→定价策略→竞争定位），3小时带你从"不知道做什么"到一份完整的BRD调研文档。AI引导你搜，你动手搜，AI帮你分析。中英双语。
+
+Complete 6-step niche product research: from "I don't know what to build" to a full BRD in 3 hours. AI guides, you search, AI analyzes. Zero research experience needed.
+
+[**Install on ClawHub**](https://clawhub.ai/adsorgcn/Niche-Awesome) | [**Details**](./skills/Niche-Awesome/SKILL.md)
 
 ---
 
@@ -147,6 +158,7 @@ Push to `main` triggers auto-publish:
 | I-Lang Protocol | [ilang.ai](https://ilang.ai) |
 | AutoCode | [ilang-ai/autocode](https://github.com/ilang-ai/autocode) |
 | Imprint | [ilang-ai/Imprint](https://github.com/ilang-ai/Imprint) |
+| 跨境风向标 | 微信公众号 / 免费知识星球，每天发布出海新动向 |
 | ClawHub Publisher | [clawhub.ai/adsorgcn](https://clawhub.ai/adsorgcn) |
 
 ---
