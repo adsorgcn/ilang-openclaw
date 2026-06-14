@@ -1,6 +1,6 @@
 ---
 name: Niche-Awesome
-version: 1.0.2
+version: 1.0.3
 slug: niche-awesome
 displayName: "出海选品调研助手"
 summary: "6步调研流程，3小时从不知道做什么到完整BRD报告"
