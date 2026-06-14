@@ -8,7 +8,8 @@ tags: [writing, editing, authenticity, multilingual]
 license: MIT
 description: "去AI味编辑器 — 让AI写的东西听起来像你自己写的。三层编辑：删掉AI指纹词→标注该加口语的位置→调节句子节奏。支持中文、英文、日文、韩文。"
 author: ilang-ai
-homepage: https://ilang.ai---
+homepage: https://ilang.ai
+---
 
 # DeAI — Make AI Drafts Sound Like You
 

@@ -8,7 +8,8 @@ summary: "从已关闭网站恢复内容，AI重组改写生成纯原创"
 tags: [content, seo, original]
 license: MIT
 author: ilang-ai
-homepage: https://ilang.ai---
+homepage: https://ilang.ai
+---
 
 # Lazarus — Bring Dead Websites Back to Life
 
@@ -141,5 +142,4 @@ Lazarus 恢复内容 → AutoCode 一键部署 → 活站上线
 MIT — Free to use, share, and build on.
 
 © 2026 I-Lang Research, iLang Inc., Canada.
-
 

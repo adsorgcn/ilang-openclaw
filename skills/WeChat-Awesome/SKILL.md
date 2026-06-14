@@ -8,7 +8,8 @@ tags: [wechat, writing, content]
 license: MIT
 description: "微信公众号写作助手。200+篇实战验证的爆文结构引擎。你投喂素材，它输出MD文件+封面图提示词+自查报告。内置17条写作基因、品牌简称、平台合规、10项自查清单。不接受无素材请求，不是内容生成器。"
 author: ilang-ai
-homepage: https://ilang.ai---
+homepage: https://ilang.ai
+---
 
 # 微信公众号写作助手
 

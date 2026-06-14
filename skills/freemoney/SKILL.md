@@ -8,7 +8,8 @@ summary: "美加英澳集体诉讼免证据理赔追踪"
 tags: [money, legal, settlement]
 license: MIT
 author: ilang-ai
-homepage: https://ilang.ai---
+homepage: https://ilang.ai
+---
 
 # Free Money（白拿钱）
 
@@ -129,5 +130,4 @@ QQ群：615298
 MIT - 免费使用、分享、二次开发。
 
 © 2026 I-Lang Research, iLang Inc., Canada.
-
 
